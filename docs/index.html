@@ -4,459 +4,372 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>参政党 ウェブ変化ログ</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+JP:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@700&family=Noto+Sans+JP:wght@400;500&display=swap">
 <style>
 :root {
-  --bg: #f4f0e8;
-  --surface: #fffefb;
-  --surface2: #f7f3ec;
-  --border: #d4cfc6;
-  --border-soft: #e6e1d8;
+  --bg: #f2efe8;
+  --surface: #fafaf7;
+  --surface2: #f0ede6;
+  --border: #d8d3ca;
+  --border-soft: #e8e3dc;
   --text: #1c1a17;
   --muted: #6a6560;
   --accent: #1a3f7a;
-  --accent-hover: #142e5a;
-  --accent-soft: #e8eef7;
-  --green: #2a6b2a;
-  --green-bg: #e8f0e8;
-  --red: #8b2222;
-  --red-bg: #f8e8e8;
+  --accent-light: #e4eaf5;
+  --bar: #4a74b4;
+  --bar-dim: #b8c8e4;
+  --green: #2e6e2e;
+  --green-bg: #e4f0e4;
+  --diff-pos: #c0392b;
+  --diff-neg: #27ae60;
   --sans: 'Noto Sans JP', system-ui, sans-serif;
   --serif: 'Noto Serif JP', serif;
   --mono: 'SFMono-Regular','Consolas',monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #131210;
-    --surface: #1c1a17;
-    --surface2: #161412;
-    --border: #2e2b26;
-    --border-soft: #252320;
-    --text: #e4e0d8;
-    --muted: #8a8680;
-    --accent: #5a8fd4;
-    --accent-hover: #7aaae0;
-    --accent-soft: #1a2840;
-    --green: #6abf6a;
-    --green-bg: #1e2e1e;
-    --red: #e07070;
-    --red-bg: #2e1a1a;
+    --bg: #111009;
+    --surface: #1a1816;
+    --surface2: #141210;
+    --border: #2a2822;
+    --border-soft: #222018;
+    --text: #e2ddd4;
+    --muted: #857f78;
+    --accent: #6090d8;
+    --accent-light: #162038;
+    --bar: #5a80c4;
+    --bar-dim: #2a3a5a;
+    --green: #5ab85a;
+    --green-bg: #182818;
+    --diff-pos: #e07060;
+    --diff-neg: #50c878;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #131210;
-  --surface: #1c1a17;
-  --surface2: #161412;
-  --border: #2e2b26;
-  --border-soft: #252320;
-  --text: #e4e0d8;
-  --muted: #8a8680;
-  --accent: #5a8fd4;
-  --accent-hover: #7aaae0;
-  --accent-soft: #1a2840;
-  --green: #6abf6a;
-  --green-bg: #1e2e1e;
-  --red: #e07070;
-  --red-bg: #2e1a1a;
+  --bg: #111009;
+  --surface: #1a1816;
+  --surface2: #141210;
+  --border: #2a2822;
+  --border-soft: #222018;
+  --text: #e2ddd4;
+  --muted: #857f78;
+  --accent: #6090d8;
+  --accent-light: #162038;
+  --bar: #5a80c4;
+  --bar-dim: #2a3a5a;
+  --green: #5ab85a;
+  --green-bg: #182818;
+  --diff-pos: #e07060;
+  --diff-neg: #50c878;
 }
-*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 14px; }
-body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.6; min-height: 100vh; }
-
-/* Layout */
-.layout { display: grid; grid-template-rows: auto auto 1fr; min-height: 100vh; }
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html { font-size:14px; }
+body { background:var(--bg); color:var(--text); font-family:var(--sans); line-height:1.6; }
 
 /* Header */
-.site-header {
-  background: var(--surface);
-  border-bottom: 2px solid var(--accent);
-  padding: 18px 24px 14px;
+.hd {
+  background:var(--surface);
+  border-bottom:2px solid var(--accent);
+  padding:16px 24px 12px;
+  display:flex; align-items:baseline; gap:16px; flex-wrap:wrap;
 }
-.site-header h1 {
-  font-family: var(--serif);
-  font-size: 1.3rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  margin-bottom: 4px;
+.hd h1 { font-family:var(--serif); font-size:1.25rem; font-weight:700; letter-spacing:.04em; flex-shrink:0; }
+.hd-meta { font-size:.76rem; color:var(--muted); font-family:var(--mono); display:flex; gap:14px; flex-wrap:wrap; }
+
+/* Overview bars */
+.overview {
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  padding:12px 24px 10px;
 }
-.site-header .meta {
-  font-size: 0.76rem;
-  color: var(--muted);
-  font-family: var(--mono);
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-}
+.overview-title { font-size:.7rem; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; margin-bottom:8px; }
+.year-bars { display:flex; gap:12px; align-items:flex-end; height:52px; }
+.year-col { display:flex; flex-direction:column; align-items:center; gap:3px; }
+.year-bar-wrap { display:flex; align-items:flex-end; height:38px; }
+.year-bar { width:28px; background:var(--bar); border-radius:2px 2px 0 0; transition:opacity .1s; cursor:default; position:relative; }
+.year-bar:hover { opacity:.8; }
+.year-bar-zero { width:28px; height:2px; background:var(--bar-dim); border-radius:1px; }
+.year-label { font-size:.68rem; color:var(--muted); font-family:var(--mono); }
+.year-count { font-size:.64rem; color:var(--muted); font-family:var(--mono); }
 
 /* Controls */
 .controls {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 10px 24px;
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  align-items: center;
-  position: sticky;
-  top: 0;
-  z-index: 20;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  padding:8px 24px;
+  display:flex; gap:6px; flex-wrap:wrap; align-items:center;
+  position:sticky; top:0; z-index:20;
 }
-.filter-label { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
-.btn-filter {
-  font-family: var(--sans);
-  font-size: 0.78rem;
-  padding: 3px 10px;
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-  transition: background .12s, color .12s, border-color .12s;
-  line-height: 1.5;
+.filter-label { font-size:.7rem; color:var(--muted); letter-spacing:.06em; text-transform:uppercase; }
+.btn {
+  font-family:var(--sans); font-size:.76rem; padding:2px 9px;
+  border:1px solid var(--border); border-radius:3px;
+  background:transparent; color:var(--muted); cursor:pointer;
+  transition:background .1s,color .1s,border-color .1s; line-height:1.5;
 }
-.btn-filter:hover { border-color: var(--accent); color: var(--accent); }
-.btn-filter.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-.sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
-.count-info { font-size: 0.75rem; color: var(--muted); margin-left: auto; font-variant-numeric: tabular-nums; }
-.search-wrap { position: relative; }
-.search-wrap input {
-  font-family: var(--mono);
-  font-size: 0.78rem;
-  padding: 3px 10px 3px 26px;
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  background: var(--bg);
-  color: var(--text);
-  width: 200px;
-  outline: none;
+.btn:hover { border-color:var(--accent); color:var(--accent); }
+.btn.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+.sep { width:1px; height:18px; background:var(--border); margin:0 2px; }
+.search-box {
+  font-family:var(--mono); font-size:.76rem; padding:2px 9px;
+  border:1px solid var(--border); border-radius:3px;
+  background:var(--bg); color:var(--text); outline:none; width:180px;
 }
-.search-wrap input:focus { border-color: var(--accent); }
-.search-wrap::before {
-  content: '🔍';
-  position: absolute;
-  left: 7px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 0.7rem;
-  pointer-events: none;
-}
+.search-box:focus { border-color:var(--accent); }
+.c-info { font-size:.72rem; color:var(--muted); margin-left:auto; font-variant-numeric:tabular-nums; }
 
-/* Main area: sidebar + detail */
-.main-area {
-  display: grid;
-  grid-template-columns: 320px 1fr;
-  min-height: 0;
-  overflow: hidden;
+/* Table */
+.tbl-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; }
+thead { background:var(--surface2); position:sticky; top:41px; z-index:10; }
+th {
+  font-size:.68rem; font-weight:500; color:var(--muted);
+  letter-spacing:.07em; text-transform:uppercase;
+  text-align:left; padding:7px 12px; white-space:nowrap;
+  border-bottom:1px solid var(--border);
 }
+th.r, td.r { text-align:right; }
+td { padding:7px 12px; border-bottom:1px solid var(--border-soft); vertical-align:middle; }
+tr.url-row { cursor:pointer; }
+tr.url-row:hover td { background:var(--accent-light); }
+tr.url-row.open td { background:var(--accent-light); }
 
-/* URL list */
-.url-list {
-  border-right: 1px solid var(--border);
-  overflow-y: auto;
-  height: calc(100vh - 106px);
-}
-.url-item {
-  display: block;
-  padding: 8px 14px;
-  border-bottom: 1px solid var(--border-soft);
-  cursor: pointer;
-  text-decoration: none;
-  color: var(--text);
-  transition: background .1s;
-}
-.url-item:hover { background: var(--accent-soft); }
-.url-item.selected { background: var(--accent-soft); border-left: 3px solid var(--accent); padding-left: 11px; }
-.url-item-path {
-  font-family: var(--mono);
-  font-size: 0.78rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.url-item-meta {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  margin-top: 2px;
-}
-.chip {
-  display: inline-block;
-  font-size: 0.65rem;
-  font-weight: 500;
-  padding: 1px 6px;
-  border-radius: 2px;
-}
-.chip-top { background: var(--green-bg); color: var(--green); }
-.chip-news { background: #fdf0e0; color: #7a4800; }
-.chip-policy { background: #f0e8f8; color: #4a1a7a; }
-.chip-election { background: #e8f0f8; color: #1a4a7a; }
-.chip-other { background: var(--surface2); color: var(--muted); }
-.url-item-count {
-  font-size: 0.7rem;
-  color: var(--muted);
-  font-family: var(--mono);
-}
-.url-item-dates {
-  font-size: 0.68rem;
-  color: var(--muted);
-  font-family: var(--mono);
-  margin-left: auto;
-}
+.td-path { font-family:var(--mono); font-size:.78rem; max-width:340px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.td-path a { color:var(--text); text-decoration:none; }
+.td-path a:hover { color:var(--accent); }
+.td-host { font-size:.7rem; color:var(--muted); font-family:var(--mono); white-space:nowrap; }
+.td-num { font-family:var(--mono); font-size:.8rem; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.td-date { font-family:var(--mono); font-size:.72rem; color:var(--muted); white-space:nowrap; }
 
-/* Detail panel */
-.detail {
-  overflow-y: auto;
-  height: calc(100vh - 106px);
-  padding: 20px 24px;
-}
-.detail-empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: var(--muted);
-  font-size: 0.9rem;
-}
-.detail-header {
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border);
-}
-.detail-url {
-  font-family: var(--mono);
-  font-size: 0.85rem;
-  word-break: break-all;
-  margin-bottom: 6px;
-}
-.detail-url a { color: var(--accent); text-decoration: none; }
-.detail-url a:hover { text-decoration: underline; }
-.detail-stat { font-size: 0.75rem; color: var(--muted); }
+.chip { display:inline-block; font-size:.65rem; font-weight:500; padding:1px 6px; border-radius:2px; }
+.chip-top  { background:var(--green-bg); color:var(--green); }
+.chip-news { background:#fdf0e0; color:#7a4800; }
+.chip-policy { background:#f0e8f8; color:#4a1a7a; }
+.chip-election { background:#e8f0f8; color:#1a4a7a; }
+.chip-other { background:var(--surface2); color:var(--muted); }
 
-/* Timeline */
-.timeline { position: relative; padding-left: 20px; }
-.timeline::before {
-  content: '';
-  position: absolute;
-  left: 7px;
-  top: 8px;
-  bottom: 8px;
-  width: 1px;
-  background: var(--border);
-}
-.tl-item {
-  position: relative;
-  margin-bottom: 16px;
-}
-.tl-dot {
-  position: absolute;
-  left: -17px;
-  top: 5px;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  border: 2px solid var(--surface);
-  background: var(--accent);
-}
-.tl-dot.first { background: var(--green); }
-.tl-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 10px 14px;
-}
-.tl-card:hover { border-color: var(--accent); }
-.tl-date {
-  font-family: var(--mono);
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--text);
-  margin-bottom: 4px;
-}
-.tl-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-.tl-link {
-  font-size: 0.74rem;
-  color: var(--accent);
-  border: 1px solid var(--accent);
-  padding: 2px 9px;
-  border-radius: 2px;
-  text-decoration: none;
-  transition: background .1s, color .1s;
-  white-space: nowrap;
-}
-.tl-link:hover { background: var(--accent); color: #fff; }
-.tl-diff-link { border-color: var(--muted); color: var(--muted); }
-.tl-diff-link:hover { background: var(--muted); color: #fff; }
-.tl-size {
-  font-size: 0.72rem;
-  color: var(--muted);
-  font-family: var(--mono);
-}
-.diff-pos { color: var(--red); }
-.diff-neg { color: var(--green); }
+/* Sparkline mini bars */
+.spark { display:inline-flex; gap:2px; align-items:flex-end; height:20px; vertical-align:middle; }
+.spark-bar { width:5px; background:var(--bar-dim); border-radius:1px 1px 0 0; }
+.spark-bar.has { background:var(--bar); }
 
-.empty-panel { padding: 40px 24px; text-align: center; color: var(--muted); font-size: 0.85rem; }
-
-@media (max-width: 700px) {
-  .main-area { grid-template-columns: 1fr; }
-  .url-list { height: 40vh; border-right: none; border-bottom: 1px solid var(--border); }
-  .detail { height: auto; min-height: 60vh; }
+/* Expand rows */
+tr.detail-row td { padding:0; }
+.detail-inner {
+  padding:0 12px 16px 32px;
+  background:var(--surface);
+  border-bottom:2px solid var(--accent);
 }
+.tl { list-style:none; border-left:2px solid var(--border); margin-left:8px; padding:8px 0; }
+.tl li { position:relative; padding:6px 0 6px 20px; }
+.tl li::before {
+  content:'';
+  position:absolute; left:-5px; top:12px;
+  width:8px; height:8px; border-radius:50%;
+  background:var(--accent); border:2px solid var(--surface);
+}
+.tl li.first-snap::before { background:var(--green); }
+.tl-d { font-family:var(--mono); font-size:.78rem; font-weight:500; margin-right:10px; }
+.tl-actions { display:inline-flex; gap:6px; align-items:center; flex-wrap:wrap; }
+.tl-a {
+  font-size:.72rem; color:var(--accent); border:1px solid var(--accent);
+  padding:1px 8px; border-radius:2px; text-decoration:none; white-space:nowrap;
+  transition:background .1s,color .1s;
+}
+.tl-a:hover { background:var(--accent); color:#fff; }
+.tl-a.diff { border-color:var(--muted); color:var(--muted); }
+.tl-a.diff:hover { background:var(--muted); color:#fff; }
+.tl-sz { font-size:.7rem; font-family:var(--mono); }
+.tl-sz.pos { color:var(--diff-pos); }
+.tl-sz.neg { color:var(--diff-neg); }
+
+.empty { padding:40px; text-align:center; color:var(--muted); }
 </style>
 </head>
 <body>
-<div class="layout">
 
-<header class="site-header">
+<header class="hd">
   <h1>参政党 ウェブ変化ログ</h1>
-  <div class="meta">
+  <div class="hd-meta">
     <span>sanseito.jp</span>
-    <span id="range-meta">-</span>
-    <span id="total-meta">-</span>
+    <span id="range-meta"></span>
+    <span id="total-meta"></span>
     <span>Wayback Machine</span>
   </div>
 </header>
 
+<div class="overview">
+  <div class="overview-title">年別 変化件数</div>
+  <div class="year-bars" id="year-bars"></div>
+</div>
+
 <div class="controls">
   <span class="filter-label">種別</span>
-  <button class="btn-filter active" data-cat="all">すべて</button>
-  <button class="btn-filter" data-cat="top">トップ</button>
-  <button class="btn-filter" data-cat="news">ニュース</button>
-  <button class="btn-filter" data-cat="policy">政策</button>
-  <button class="btn-filter" data-cat="election">選挙</button>
-  <button class="btn-filter" data-cat="other">その他</button>
+  <button class="btn active" data-cat="all">すべて</button>
+  <button class="btn" data-cat="top">トップ</button>
+  <button class="btn" data-cat="news">ニュース</button>
+  <button class="btn" data-cat="policy">政策</button>
+  <button class="btn" data-cat="election">選挙</button>
+  <button class="btn" data-cat="other">その他</button>
   <div class="sep"></div>
-  <div class="search-wrap">
-    <input type="text" id="search" placeholder="パスで絞り込み…" autocomplete="off">
-  </div>
-  <span class="count-info" id="count-info"></span>
+  <input class="search-box" type="text" id="search" placeholder="パスで絞り込み…" autocomplete="off">
+  <span class="c-info" id="c-info"></span>
 </div>
 
-<div class="main-area">
-  <div class="url-list" id="url-list"></div>
-  <div class="detail" id="detail">
-    <div class="detail-empty">左のURLを選択してください</div>
-  </div>
+<div class="tbl-wrap">
+<table>
+  <thead>
+    <tr>
+      <th>パス</th>
+      <th>ホスト</th>
+      <th>種別</th>
+      <th class="r">変化回数</th>
+      <th>年別分布</th>
+      <th>初回</th>
+      <th>最終</th>
+    </tr>
+  </thead>
+  <tbody id="tbody"></tbody>
+</table>
+<div class="empty" id="empty" hidden>該当なし</div>
 </div>
-
-</div><!-- .layout -->
 
 <script>
-let allPages = [];
-let filtered = [];
-let selectedIdx = -1;
-let catFilter = 'all';
+const YEARS = ['2020','2021','2022','2023','2024','2025','2026'];
+const CAT_LABEL = {top:'トップ',news:'ニュース',policy:'政策',election:'選挙',other:'その他'};
+const CAT_CHIP  = {top:'chip-top',news:'chip-news',policy:'chip-policy',election:'chip-election',other:'chip-other'};
 
-const catLabels = { top: 'トップ', news: 'ニュース', policy: '政策', election: '選挙', other: 'その他' };
-const catChip = { top: 'chip-top', news: 'chip-news', policy: 'chip-policy', election: 'chip-election', other: 'chip-other' };
+let allPages = [], filtered = [], openPath = null, catFilter = 'all';
 
 fetch('data.json').then(r=>r.json()).then(data => {
   allPages = data;
-  updateMeta();
+  initMeta();
+  initOverview();
   applyFilter();
 });
 
-function updateMeta() {
-  const totalChanges = allPages.reduce((s,p) => s + p.count, 0);
-  document.getElementById('total-meta').textContent = `${allPages.length}URL / ${totalChanges}件の変化`;
-  const allDates = allPages.flatMap(p => [p.first, p.last]).filter(Boolean).sort();
-  if (allDates.length) {
-    document.getElementById('range-meta').textContent = `${allDates[0]} 〜 ${allDates[allDates.length-1]}`;
-  }
+function initMeta() {
+  const totalEv = allPages.reduce((s,p)=>s+p.count,0);
+  document.getElementById('total-meta').textContent = allPages.length + 'URL / ' + totalEv + '件の変化';
+  const dates = allPages.flatMap(p=>[p.first,p.last]).filter(Boolean).sort();
+  if (dates.length) document.getElementById('range-meta').textContent = dates[0] + ' 〜 ' + dates[dates.length-1];
+}
+
+function initOverview() {
+  const byYear = {};
+  YEARS.forEach(y => byYear[y] = 0);
+  allPages.forEach(p => p.changes.forEach(c => { if (byYear[c.y]!==undefined) byYear[c.y]++; }));
+  const max = Math.max(...Object.values(byYear), 1);
+  const container = document.getElementById('year-bars');
+  container.innerHTML = YEARS.map(y => {
+    const h = Math.round((byYear[y] / max) * 38);
+    const barHtml = byYear[y] > 0
+      ? `<div class="year-bar" style="height:${h}px" title="${y}: ${byYear[y]}件"></div>`
+      : `<div class="year-bar-zero"></div>`;
+    return `<div class="year-col">
+      <div class="year-bar-wrap">${barHtml}</div>
+      <div class="year-label">${y}</div>
+      <div class="year-count">${byYear[y]}</div>
+    </div>`;
+  }).join('');
 }
 
 function applyFilter() {
   const q = document.getElementById('search').value.trim().toLowerCase();
   filtered = allPages.filter(p => {
     if (catFilter !== 'all' && p.cat !== catFilter) return false;
-    if (q && !p.path.toLowerCase().includes(q) && !p.url.toLowerCase().includes(q)) return false;
+    if (q && !p.url.toLowerCase().includes(q) && !p.path.toLowerCase().includes(q)) return false;
     return true;
   });
-  const totalChanges = filtered.reduce((s,p) => s + p.count, 0);
-  document.getElementById('count-info').textContent = `${filtered.length}URL / ${totalChanges}件`;
-  renderList();
+  const totalEv = filtered.reduce((s,p)=>s+p.count,0);
+  document.getElementById('c-info').textContent = filtered.length + 'URL / ' + totalEv + '件';
+  renderTable();
 }
 
-function renderList() {
-  const el = document.getElementById('url-list');
-  if (!filtered.length) {
-    el.innerHTML = '<div class="empty-panel">該当なし</div>';
-    return;
+function sparkHtml(changes) {
+  const byYear = {};
+  YEARS.forEach(y => byYear[y] = 0);
+  changes.forEach(c => { if (byYear[c.y]!==undefined) byYear[c.y]++; });
+  const max = Math.max(...Object.values(byYear), 1);
+  return '<div class="spark">' + YEARS.map(y => {
+    const h = Math.max(Math.round((byYear[y]/max)*18), byYear[y]>0?2:0);
+    return `<div class="spark-bar${byYear[y]>0?' has':''}" style="height:${Math.max(h,1)}px" title="${y}:${byYear[y]}"></div>`;
+  }).join('') + '</div>';
+}
+
+function renderTable() {
+  const tbody = document.getElementById('tbody');
+  const empty = document.getElementById('empty');
+  if (!filtered.length) { tbody.innerHTML=''; empty.hidden=false; return; }
+  empty.hidden = true;
+
+  tbody.innerHTML = filtered.map(p => {
+    const chipCls = CAT_CHIP[p.cat]||'chip-other';
+    const label = CAT_LABEL[p.cat]||p.cat;
+    const isOpen = openPath === p.url;
+    const spark = sparkHtml(p.changes);
+
+    const rowHtml = `<tr class="url-row${isOpen?' open':''}" data-url="${p.url}" onclick="toggleRow(this,'${p.url.replace(/'/g,"\\'")}')">
+      <td class="td-path" title="${p.url}">${p.path}</td>
+      <td class="td-host">${p.host}</td>
+      <td><span class="chip ${chipCls}">${label}</span></td>
+      <td class="td-num r">${p.count}</td>
+      <td>${spark}</td>
+      <td class="td-date">${p.first}</td>
+      <td class="td-date">${p.last}</td>
+    </tr>`;
+
+    if (!isOpen) return rowHtml;
+
+    const tlHtml = p.changes.map((c,i) => {
+      const isFirst = i===0;
+      let szHtml = '';
+      if (c.diffFmt) {
+        const cls = c.diff > 0 ? 'pos' : (c.diff < 0 ? 'neg' : '');
+        szHtml = `<span class="tl-sz ${cls}">${c.diffFmt}</span>`;
+      } else if (c.bytes) {
+        szHtml = `<span class="tl-sz">${(c.bytes/1024).toFixed(1)}KB</span>`;
+      }
+      const diffLink = c.diffUrl ? `<a class="tl-a diff" href="${c.diffUrl}" target="_blank" rel="noopener">差分</a>` : '';
+      return `<li class="${isFirst?'first-snap':''}">
+        <span class="tl-d">${c.d}</span>
+        <span class="tl-actions">
+          <a class="tl-a" href="${c.wb}" target="_blank" rel="noopener">スナップショット</a>
+          ${diffLink}
+          ${szHtml}
+        </span>
+      </li>`;
+    }).join('');
+
+    const detailHtml = `<tr class="detail-row"><td colspan="7">
+      <div class="detail-inner">
+        <ul class="tl">${tlHtml}</ul>
+      </div>
+    </td></tr>`;
+
+    return rowHtml + detailHtml;
+  }).join('');
+}
+
+function toggleRow(tr, url) {
+  openPath = (openPath === url) ? null : url;
+  renderTable();
+  if (openPath) {
+    const openTr = document.querySelector(`tr.url-row.open`);
+    if (openTr) setTimeout(() => openTr.scrollIntoView({behavior:'smooth',block:'nearest'}), 50);
   }
-  el.innerHTML = filtered.map((p,i) => {
-    const chipClass = catChip[p.cat] || 'chip-other';
-    const label = catLabels[p.cat] || p.cat;
-    return `<div class="url-item${selectedIdx===i?' selected':''}" data-i="${i}" onclick="selectPage(${i})">
-      <div class="url-item-path" title="${p.url}">${p.path}</div>
-      <div class="url-item-meta">
-        <span class="chip ${chipClass}">${label}</span>
-        <span class="url-item-count">${p.count}回変化</span>
-        <span class="url-item-dates">${p.first} 〜 ${p.last}</span>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function selectPage(i) {
-  selectedIdx = i;
-  renderList();
-  const p = filtered[i];
-  const chipClass = catChip[p.cat] || 'chip-other';
-  const label = catLabels[p.cat] || p.cat;
-
-  const changes = p.changes;
-  const timelineHtml = changes.map((c, j) => {
-    const isFirst = j === 0;
-    let diffHtml = '';
-    if (c.diffFmt) {
-      const cls = (c.diff > 0) ? 'diff-pos' : (c.diff < 0 ? 'diff-neg' : '');
-      diffHtml = `<span class="tl-size ${cls}">${c.diffFmt}</span>`;
-    } else if (c.bytes) {
-      diffHtml = `<span class="tl-size">${(c.bytes/1024).toFixed(1)}KB</span>`;
-    }
-    const diffLinkHtml = c.diffUrl
-      ? `<a class="tl-link tl-diff-link" href="${c.diffUrl}" target="_blank" rel="noopener">差分</a>`
-      : '';
-    return `<div class="tl-item">
-      <div class="tl-dot${isFirst?' first':''}"></div>
-      <div class="tl-card">
-        <div class="tl-date">${c.d}${isFirst?' <small style="color:var(--muted);font-weight:400">(初回)</small>':''}</div>
-        <div class="tl-actions">
-          <a class="tl-link" href="${c.wb}" target="_blank" rel="noopener">スナップショット</a>
-          ${diffLinkHtml}
-          ${diffHtml}
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-
-  document.getElementById('detail').innerHTML = `
-    <div class="detail-header">
-      <div class="detail-url"><a href="${p.url}" target="_blank" rel="noopener">${p.url}</a></div>
-      <div class="detail-stat">
-        <span class="chip ${chipClass}">${label}</span>
-        &nbsp;${p.count}回の内容変化 &nbsp;/&nbsp; ${p.first} 〜 ${p.last}
-      </div>
-    </div>
-    <div class="timeline">${timelineHtml}</div>
-  `;
 }
 
 document.querySelectorAll('[data-cat]').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('[data-cat]').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('[data-cat]').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
     catFilter = btn.dataset.cat;
-    selectedIdx = -1;
-    document.getElementById('detail').innerHTML = '<div class="detail-empty">左のURLを選択してください</div>';
+    openPath = null;
     applyFilter();
   });
 });
-
-document.getElementById('search').addEventListener('input', () => {
-  selectedIdx = -1;
-  document.getElementById('detail').innerHTML = '<div class="detail-empty">左のURLを選択してください</div>';
-  applyFilter();
-});
+document.getElementById('search').addEventListener('input', () => { openPath=null; applyFilter(); });
 </script>
 </body>
 </html>
