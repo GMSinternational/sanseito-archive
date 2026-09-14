@@ -22,6 +22,12 @@
   --green-bg: #e4f0e4;
   --diff-pos: #c0392b;
   --diff-neg: #27ae60;
+  --src-wb: #1a3f7a;
+  --src-wb-bg: #e4eaf5;
+  --src-cc: #5a3a8a;
+  --src-cc-bg: #ede8f8;
+  --src-at: #8a3a1a;
+  --src-at-bg: #f8ece4;
   --sans: 'Noto Sans JP', system-ui, sans-serif;
   --serif: 'Noto Serif JP', serif;
   --mono: 'SFMono-Regular','Consolas',monospace;
@@ -43,6 +49,12 @@
     --green-bg: #182818;
     --diff-pos: #e07060;
     --diff-neg: #50c878;
+    --src-wb: #6090d8;
+    --src-wb-bg: #162038;
+    --src-cc: #a880e8;
+    --src-cc-bg: #281840;
+    --src-at: #e89060;
+    --src-at-bg: #401808;
   }
 }
 :root[data-theme="dark"] {
@@ -61,6 +73,12 @@
   --green-bg: #182818;
   --diff-pos: #e07060;
   --diff-neg: #50c878;
+  --src-wb: #6090d8;
+  --src-wb-bg: #162038;
+  --src-cc: #a880e8;
+  --src-cc-bg: #281840;
+  --src-at: #e89060;
+  --src-at-bg: #401808;
 }
 *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
 html { font-size:14px; }
@@ -74,23 +92,34 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); line-he
   display:flex; align-items:baseline; gap:16px; flex-wrap:wrap;
 }
 .hd h1 { font-family:var(--serif); font-size:1.25rem; font-weight:700; letter-spacing:.04em; flex-shrink:0; }
-.hd-meta { font-size:.76rem; color:var(--muted); font-family:var(--mono); display:flex; gap:14px; flex-wrap:wrap; }
+.hd-meta { font-size:.76rem; color:var(--muted); font-family:var(--mono); display:flex; gap:14px; flex-wrap:wrap; align-items:center; }
+
+/* Source legend */
+.src-legend { display:flex; gap:8px; align-items:center; }
+.src-chip { display:inline-flex; align-items:center; gap:3px; font-size:.68rem; font-weight:500; padding:2px 7px; border-radius:10px; }
+.src-wb   { background:var(--src-wb-bg); color:var(--src-wb); }
+.src-cc   { background:var(--src-cc-bg); color:var(--src-cc); }
+.src-at   { background:var(--src-at-bg); color:var(--src-at); }
 
 /* Overview bars */
 .overview {
   background:var(--surface);
   border-bottom:1px solid var(--border);
   padding:12px 24px 10px;
+  display:flex; gap:32px; align-items:flex-start; flex-wrap:wrap;
 }
-.overview-title { font-size:.7rem; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; margin-bottom:8px; }
-.year-bars { display:flex; gap:12px; align-items:flex-end; height:52px; }
+.ov-section { }
+.ov-title { font-size:.7rem; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; margin-bottom:8px; }
+.year-bars { display:flex; gap:10px; align-items:flex-end; height:52px; }
 .year-col { display:flex; flex-direction:column; align-items:center; gap:3px; }
-.year-bar-wrap { display:flex; align-items:flex-end; height:38px; }
-.year-bar { width:28px; background:var(--bar); border-radius:2px 2px 0 0; transition:opacity .1s; cursor:default; position:relative; }
-.year-bar:hover { opacity:.8; }
-.year-bar-zero { width:28px; height:2px; background:var(--bar-dim); border-radius:1px; }
-.year-label { font-size:.68rem; color:var(--muted); font-family:var(--mono); }
-.year-count { font-size:.64rem; color:var(--muted); font-family:var(--mono); }
+.year-bar-wrap { display:flex; align-items:flex-end; height:38px; gap:2px; }
+.year-bar { width:12px; border-radius:2px 2px 0 0; cursor:default; }
+.year-bar.wb  { background:var(--src-wb); }
+.year-bar.cc  { background:var(--src-cc); }
+.year-bar.at  { background:var(--src-at); }
+.year-bar.dim { background:var(--bar-dim); }
+.year-label { font-size:.66rem; color:var(--muted); font-family:var(--mono); }
+.year-count { font-size:.62rem; color:var(--muted); font-family:var(--mono); }
 
 /* Controls */
 .controls {
@@ -134,24 +163,31 @@ tr.url-row { cursor:pointer; }
 tr.url-row:hover td { background:var(--accent-light); }
 tr.url-row.open td { background:var(--accent-light); }
 
-.td-path { font-family:var(--mono); font-size:.78rem; max-width:340px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.td-path a { color:var(--text); text-decoration:none; }
-.td-path a:hover { color:var(--accent); }
+.td-path { font-family:var(--mono); font-size:.78rem; max-width:360px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .td-host { font-size:.7rem; color:var(--muted); font-family:var(--mono); white-space:nowrap; }
-.td-num { font-family:var(--mono); font-size:.8rem; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.td-num  { font-family:var(--mono); font-size:.8rem; font-variant-numeric:tabular-nums; white-space:nowrap; }
 .td-date { font-family:var(--mono); font-size:.72rem; color:var(--muted); white-space:nowrap; }
 
 .chip { display:inline-block; font-size:.65rem; font-weight:500; padding:1px 6px; border-radius:2px; }
-.chip-top  { background:var(--green-bg); color:var(--green); }
-.chip-news { background:#fdf0e0; color:#7a4800; }
-.chip-policy { background:#f0e8f8; color:#4a1a7a; }
+.chip-top      { background:var(--green-bg); color:var(--green); }
+.chip-news     { background:#fdf0e0; color:#7a4800; }
+.chip-policy   { background:#f0e8f8; color:#4a1a7a; }
 .chip-election { background:#e8f0f8; color:#1a4a7a; }
-.chip-other { background:var(--surface2); color:var(--muted); }
+.chip-other    { background:var(--surface2); color:var(--muted); }
 
-/* Sparkline mini bars */
-.spark { display:inline-flex; gap:2px; align-items:flex-end; height:20px; vertical-align:middle; }
-.spark-bar { width:5px; background:var(--bar-dim); border-radius:1px 1px 0 0; }
-.spark-bar.has { background:var(--bar); }
+/* Sparkline */
+.spark { display:inline-flex; gap:1px; align-items:flex-end; height:20px; vertical-align:middle; }
+.spark-bar { width:4px; background:var(--bar-dim); border-radius:1px 1px 0 0; }
+.spark-bar.wb { background:var(--src-wb); }
+.spark-bar.cc { background:var(--src-cc); }
+.spark-bar.at { background:var(--src-at); }
+
+/* Source icons in table */
+.src-dots { display:inline-flex; gap:3px; }
+.src-dot { width:7px; height:7px; border-radius:50%; }
+.src-dot.wb { background:var(--src-wb); }
+.src-dot.cc { background:var(--src-cc); }
+.src-dot.at { background:var(--src-at); }
 
 /* Expand rows */
 tr.detail-row td { padding:0; }
@@ -163,13 +199,18 @@ tr.detail-row td { padding:0; }
 .tl { list-style:none; border-left:2px solid var(--border); margin-left:8px; padding:8px 0; }
 .tl li { position:relative; padding:6px 0 6px 20px; }
 .tl li::before {
-  content:'';
-  position:absolute; left:-5px; top:12px;
+  content:''; position:absolute; left:-5px; top:12px;
   width:8px; height:8px; border-radius:50%;
-  background:var(--accent); border:2px solid var(--surface);
+  background:var(--src-wb); border:2px solid var(--surface);
 }
+.tl li.src-cc::before { background:var(--src-cc); }
+.tl li.src-at::before { background:var(--src-at); }
 .tl li.first-snap::before { background:var(--green); }
-.tl-d { font-family:var(--mono); font-size:.78rem; font-weight:500; margin-right:10px; }
+.tl-d { font-family:var(--mono); font-size:.78rem; font-weight:500; margin-right:8px; }
+.tl-src { font-size:.65rem; padding:1px 5px; border-radius:8px; margin-right:6px; }
+.tl-src.wb { background:var(--src-wb-bg); color:var(--src-wb); }
+.tl-src.cc { background:var(--src-cc-bg); color:var(--src-cc); }
+.tl-src.at { background:var(--src-at-bg); color:var(--src-at); }
 .tl-actions { display:inline-flex; gap:6px; align-items:center; flex-wrap:wrap; }
 .tl-a {
   font-size:.72rem; color:var(--accent); border:1px solid var(--accent);
@@ -194,13 +235,19 @@ tr.detail-row td { padding:0; }
     <span>sanseito.jp</span>
     <span id="range-meta"></span>
     <span id="total-meta"></span>
-    <span>Wayback Machine</span>
+    <div class="src-legend">
+      <span class="src-chip src-wb">Wayback</span>
+      <span class="src-chip src-cc">CommonCrawl</span>
+      <span class="src-chip src-at">archive.today</span>
+    </div>
   </div>
 </header>
 
 <div class="overview">
-  <div class="overview-title">年別 変化件数</div>
-  <div class="year-bars" id="year-bars"></div>
+  <div class="ov-section">
+    <div class="ov-title">年別 スナップショット数（ソース別）</div>
+    <div class="year-bars" id="year-bars"></div>
+  </div>
 </div>
 
 <div class="controls">
@@ -211,6 +258,12 @@ tr.detail-row td { padding:0; }
   <button class="btn" data-cat="policy">政策</button>
   <button class="btn" data-cat="election">選挙</button>
   <button class="btn" data-cat="other">その他</button>
+  <div class="sep"></div>
+  <span class="filter-label">ソース</span>
+  <button class="btn active" data-src="all">すべて</button>
+  <button class="btn" data-src="wayback">Wayback</button>
+  <button class="btn" data-src="commoncrawl">CC</button>
+  <button class="btn" data-src="archive.today">archive.today</button>
   <div class="sep"></div>
   <input class="search-box" type="text" id="search" placeholder="パスで絞り込み…" autocomplete="off">
   <span class="c-info" id="c-info"></span>
@@ -223,7 +276,8 @@ tr.detail-row td { padding:0; }
       <th>パス</th>
       <th>ホスト</th>
       <th>種別</th>
-      <th class="r">変化回数</th>
+      <th>ソース</th>
+      <th class="r">件数</th>
       <th>年別分布</th>
       <th>初回</th>
       <th>最終</th>
@@ -238,8 +292,11 @@ tr.detail-row td { padding:0; }
 const YEARS = ['2020','2021','2022','2023','2024','2025','2026'];
 const CAT_LABEL = {top:'トップ',news:'ニュース',policy:'政策',election:'選挙',other:'その他'};
 const CAT_CHIP  = {top:'chip-top',news:'chip-news',policy:'chip-policy',election:'chip-election',other:'chip-other'};
+const SRC_LABEL = {wayback:'Wayback',commoncrawl:'CC','archive.today':'archive.today'};
+const SRC_CLS   = {wayback:'wb',commoncrawl:'cc','archive.today':'at'};
 
-let allPages = [], filtered = [], openPath = null, catFilter = 'all';
+let allPages = [], filtered = [], openPath = null;
+let catFilter = 'all', srcFilter = 'all';
 
 fetch('data.json').then(r=>r.json()).then(data => {
   allPages = data;
@@ -250,50 +307,87 @@ fetch('data.json').then(r=>r.json()).then(data => {
 
 function initMeta() {
   const totalEv = allPages.reduce((s,p)=>s+p.count,0);
-  document.getElementById('total-meta').textContent = allPages.length + 'URL / ' + totalEv + '件の変化';
+  document.getElementById('total-meta').textContent = allPages.length + 'URL / ' + totalEv + '件';
   const dates = allPages.flatMap(p=>[p.first,p.last]).filter(Boolean).sort();
   if (dates.length) document.getElementById('range-meta').textContent = dates[0] + ' 〜 ' + dates[dates.length-1];
 }
 
 function initOverview() {
   const byYear = {};
-  YEARS.forEach(y => byYear[y] = 0);
-  allPages.forEach(p => p.changes.forEach(c => { if (byYear[c.y]!==undefined) byYear[c.y]++; }));
-  const max = Math.max(...Object.values(byYear), 1);
-  const container = document.getElementById('year-bars');
-  container.innerHTML = YEARS.map(y => {
-    const h = Math.round((byYear[y] / max) * 38);
-    const barHtml = byYear[y] > 0
-      ? `<div class="year-bar" style="height:${h}px" title="${y}: ${byYear[y]}件"></div>`
-      : `<div class="year-bar-zero"></div>`;
+  YEARS.forEach(y => byYear[y] = {wb:0,cc:0,at:0,total:0});
+  allPages.forEach(p => p.changes.forEach(c => {
+    const y = c.y;
+    if (!byYear[y]) return;
+    const s = c.source === 'wayback' ? 'wb' : c.source === 'commoncrawl' ? 'cc' : 'at';
+    byYear[y][s]++;
+    byYear[y].total++;
+  }));
+  const max = Math.max(...YEARS.map(y=>byYear[y].total), 1);
+  document.getElementById('year-bars').innerHTML = YEARS.map(y => {
+    const d = byYear[y];
+    const scale = h => Math.round((h/max)*38);
+    const barsHtml = d.total > 0
+      ? ['wb','cc','at'].filter(s=>d[s]>0).map(s =>
+          `<div class="year-bar ${s}" style="height:${Math.max(scale(d[s]),2)}px" title="${SRC_LABEL[s==='wb'?'wayback':s==='cc'?'commoncrawl':'archive.today']}: ${d[s]}件"></div>`
+        ).join('')
+      : `<div class="year-bar dim" style="height:2px"></div>`;
     return `<div class="year-col">
-      <div class="year-bar-wrap">${barHtml}</div>
-      <div class="year-label">${y}</div>
-      <div class="year-count">${byYear[y]}</div>
+      <div class="year-bar-wrap">${barsHtml}</div>
+      <div class="year-label">${y.slice(2)}</div>
+      <div class="year-count">${d.total||''}</div>
     </div>`;
   }).join('');
+}
+
+function pageHasSrc(p, src) {
+  if (src === 'all') return true;
+  return p.changes.some(c => c.source === src);
 }
 
 function applyFilter() {
   const q = document.getElementById('search').value.trim().toLowerCase();
   filtered = allPages.filter(p => {
     if (catFilter !== 'all' && p.cat !== catFilter) return false;
+    if (!pageHasSrc(p, srcFilter)) return false;
     if (q && !p.url.toLowerCase().includes(q) && !p.path.toLowerCase().includes(q)) return false;
     return true;
   });
-  const totalEv = filtered.reduce((s,p)=>s+p.count,0);
+  const totalEv = filtered.reduce((s,p)=>s+filteredCount(p),0);
   document.getElementById('c-info').textContent = filtered.length + 'URL / ' + totalEv + '件';
   renderTable();
 }
 
+function filteredCount(p) {
+  if (srcFilter === 'all') return p.count;
+  return p.changes.filter(c => c.source === srcFilter).length;
+}
+
+function srcDots(changes) {
+  const srcs = new Set(changes.map(c=>c.source));
+  return '<div class="src-dots">' + [...srcs].map(s => {
+    const cls = SRC_CLS[s] || '';
+    return `<div class="src-dot ${cls}" title="${SRC_LABEL[s]||s}"></div>`;
+  }).join('') + '</div>';
+}
+
 function sparkHtml(changes) {
   const byYear = {};
-  YEARS.forEach(y => byYear[y] = 0);
-  changes.forEach(c => { if (byYear[c.y]!==undefined) byYear[c.y]++; });
-  const max = Math.max(...Object.values(byYear), 1);
+  YEARS.forEach(y => byYear[y] = {wb:0,cc:0,at:0,total:0});
+  const chs = srcFilter === 'all' ? changes : changes.filter(c=>c.source===srcFilter);
+  chs.forEach(c => {
+    const y = c.y;
+    if (!byYear[y]) return;
+    const s = SRC_CLS[c.source] || 'wb';
+    byYear[y][s]++;
+    byYear[y].total++;
+  });
+  const max = Math.max(...YEARS.map(y=>byYear[y].total), 1);
   return '<div class="spark">' + YEARS.map(y => {
-    const h = Math.max(Math.round((byYear[y]/max)*18), byYear[y]>0?2:0);
-    return `<div class="spark-bar${byYear[y]>0?' has':''}" style="height:${Math.max(h,1)}px" title="${y}:${byYear[y]}"></div>`;
+    const d = byYear[y];
+    const h = Math.max(Math.round((d.total/max)*18), d.total>0?2:0);
+    // 支配的ソースの色
+    const cls = d.cc > d.wb && d.cc > d.at ? 'cc' : d.at > d.wb ? 'at' : d.total>0 ? 'wb' : '';
+    return `<div class="spark-bar ${cls}" style="height:${Math.max(h,1)}px" title="${y}:${d.total}"></div>`;
   }).join('') + '</div>';
 }
 
@@ -305,71 +399,74 @@ function renderTable() {
 
   tbody.innerHTML = filtered.map(p => {
     const chipCls = CAT_CHIP[p.cat]||'chip-other';
-    const label = CAT_LABEL[p.cat]||p.cat;
-    const isOpen = openPath === p.url;
-    const spark = sparkHtml(p.changes);
+    const label   = CAT_LABEL[p.cat]||p.cat;
+    const isOpen  = openPath === p.url;
+    const cnt     = filteredCount(p);
 
-    const rowHtml = `<tr class="url-row${isOpen?' open':''}" data-url="${p.url}" onclick="toggleRow(this,'${p.url.replace(/'/g,"\\'")}')">
+    const rowHtml = `<tr class="url-row${isOpen?' open':''}" onclick="toggleRow('${p.url.replace(/'/g,"\\'")}')">
       <td class="td-path" title="${p.url}">${p.path}</td>
       <td class="td-host">${p.host}</td>
       <td><span class="chip ${chipCls}">${label}</span></td>
-      <td class="td-num r">${p.count}</td>
-      <td>${spark}</td>
+      <td>${srcDots(p.changes)}</td>
+      <td class="td-num r">${cnt}</td>
+      <td>${sparkHtml(p.changes)}</td>
       <td class="td-date">${p.first}</td>
       <td class="td-date">${p.last}</td>
     </tr>`;
 
     if (!isOpen) return rowHtml;
 
-    const tlHtml = p.changes.map((c,i) => {
+    const chs = srcFilter === 'all' ? p.changes : p.changes.filter(c=>c.source===srcFilter);
+    const tlHtml = chs.map((c,i) => {
       const isFirst = i===0;
+      const srcCls  = SRC_CLS[c.source] || 'wb';
+      const srcLbl  = SRC_LABEL[c.source] || c.source;
       let szHtml = '';
       if (c.diffFmt) {
-        const cls = c.diff > 0 ? 'pos' : (c.diff < 0 ? 'neg' : '');
+        const cls = c.diff > 0 ? 'pos' : c.diff < 0 ? 'neg' : '';
         szHtml = `<span class="tl-sz ${cls}">${c.diffFmt}</span>`;
       } else if (c.bytes) {
         szHtml = `<span class="tl-sz">${(c.bytes/1024).toFixed(1)}KB</span>`;
       }
-      const diffLink = c.diffUrl ? `<a class="tl-a diff" href="${c.diffUrl}" target="_blank" rel="noopener">差分</a>` : '';
-      return `<li class="${isFirst?'first-snap':''}">
+      const diffLink = c.diffUrl
+        ? `<a class="tl-a diff" href="${c.diffUrl}" target="_blank" rel="noopener">差分</a>` : '';
+      const viewLink = c.wb
+        ? `<a class="tl-a" href="${c.wb}" target="_blank" rel="noopener">表示</a>` : '';
+      return `<li class="${isFirst?'first-snap':''} src-${srcCls}">
         <span class="tl-d">${c.d}</span>
-        <span class="tl-actions">
-          <a class="tl-a" href="${c.wb}" target="_blank" rel="noopener">スナップショット</a>
-          ${diffLink}
-          ${szHtml}
-        </span>
+        <span class="tl-src ${srcCls}">${srcLbl}</span>
+        <span class="tl-actions">${viewLink}${diffLink}${szHtml}</span>
       </li>`;
     }).join('');
 
-    const detailHtml = `<tr class="detail-row"><td colspan="7">
-      <div class="detail-inner">
-        <ul class="tl">${tlHtml}</ul>
-      </div>
+    return rowHtml + `<tr class="detail-row"><td colspan="8">
+      <div class="detail-inner"><ul class="tl">${tlHtml}</ul></div>
     </td></tr>`;
-
-    return rowHtml + detailHtml;
   }).join('');
 }
 
-function toggleRow(tr, url) {
+function toggleRow(url) {
   openPath = (openPath === url) ? null : url;
   renderTable();
   if (openPath) {
-    const openTr = document.querySelector(`tr.url-row.open`);
-    if (openTr) setTimeout(() => openTr.scrollIntoView({behavior:'smooth',block:'nearest'}), 50);
+    const el = document.querySelector('tr.url-row.open');
+    if (el) setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
   }
 }
 
 document.querySelectorAll('[data-cat]').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('[data-cat]').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    catFilter = btn.dataset.cat;
-    openPath = null;
-    applyFilter();
+    btn.classList.add('active'); catFilter = btn.dataset.cat; openPath=null; applyFilter();
   });
 });
-document.getElementById('search').addEventListener('input', () => { openPath=null; applyFilter(); });
+document.querySelectorAll('[data-src]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-src]').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active'); srcFilter = btn.dataset.src; openPath=null; applyFilter();
+  });
+});
+document.getElementById('search').addEventListener('input', ()=>{openPath=null;applyFilter();});
 </script>
 </body>
 </html>
