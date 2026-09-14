@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>参政党 ウェブアーカイブ</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+JP:wght@400;500&display=swap">
+<style>
+:root {
+  --bg: #f4f0e8;
+  --surface: #fffefb;
+  --border: #d4cfc6;
+  --border-soft: #e6e1d8;
+  --text: #1c1a17;
+  --muted: #6a6560;
+  --accent: #1a3f7a;
+  --accent-hover: #142e5a;
+  --accent-soft: #e8eef7;
+  --chip-top: #e8f0e8;
+  --chip-top-text: #2a5a2a;
+  --chip-news: #fdf0e0;
+  --chip-news-text: #7a4800;
+  --chip-policy: #f0e8f8;
+  --chip-policy-text: #4a1a7a;
+  --sans: 'Noto Sans JP', system-ui, sans-serif;
+  --serif: 'Noto Serif JP', serif;
+  --mono: 'SFMono-Regular','Consolas',monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131210;
+    --surface: #1c1a17;
+    --border: #2e2b26;
+    --border-soft: #252320;
+    --text: #e4e0d8;
+    --muted: #8a8680;
+    --accent: #5a8fd4;
+    --accent-hover: #7aaae0;
+    --accent-soft: #1a2840;
+    --chip-top: #1e2e1e;
+    --chip-top-text: #7abf7a;
+    --chip-news: #2e2010;
+    --chip-news-text: #d4963a;
+    --chip-policy: #201530;
+    --chip-policy-text: #b08ae0;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131210;
+  --surface: #1c1a17;
+  --border: #2e2b26;
+  --border-soft: #252320;
+  --text: #e4e0d8;
+  --muted: #8a8680;
+  --accent: #5a8fd4;
+  --accent-hover: #7aaae0;
+  --accent-soft: #1a2840;
+  --chip-top: #1e2e1e;
+  --chip-top-text: #7abf7a;
+  --chip-news: #2e2010;
+  --chip-news-text: #d4963a;
+  --chip-policy: #201530;
+  --chip-policy-text: #b08ae0;
+}
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; }
+body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.6; min-height: 100vh; }
+
+/* Header */
+.site-header {
+  background: var(--surface);
+  border-bottom: 2px solid var(--accent);
+  padding: 20px 24px 16px;
+}
+.site-header h1 {
+  font-family: var(--serif);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+.site-header .meta {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-family: var(--mono);
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.site-header .meta span { display: inline-flex; align-items: center; gap: 4px; }
+
+/* Controls */
+.controls {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.filter-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.filter-label { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; min-width: 3.5em; }
+.btn-filter {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  padding: 3px 10px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background .12s, color .12s, border-color .12s;
+  line-height: 1.5;
+}
+.btn-filter:hover { border-color: var(--accent); color: var(--accent); }
+.btn-filter.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.result-count { font-size: 0.75rem; color: var(--muted); margin-left: auto; font-variant-numeric: tabular-nums; }
+
+/* Table */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 88px; z-index: 5; }
+th {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: left;
+  padding: 8px 12px;
+  white-space: nowrap;
+}
+td { padding: 7px 12px; border-bottom: 1px solid var(--border-soft); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--accent-soft); }
+.td-date { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.td-cat { white-space: nowrap; }
+.chip {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 500;
+  padding: 1px 7px;
+  border-radius: 2px;
+  letter-spacing: 0.03em;
+}
+.chip-top { background: var(--chip-top); color: var(--chip-top-text); }
+.chip-news { background: var(--chip-news); color: var(--chip-news-text); }
+.chip-policy { background: var(--chip-policy); color: var(--chip-policy-text); }
+.td-path { font-family: var(--mono); font-size: 0.78rem; max-width: 360px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.td-path a { color: var(--text); text-decoration: none; }
+.td-path a:hover { color: var(--accent); text-decoration: underline; }
+.td-link a {
+  display: inline-block;
+  font-size: 0.75rem;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 1px 8px;
+  border-radius: 2px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background .1s, color .1s;
+}
+.td-link a:hover { background: var(--accent); color: #fff; }
+
+.empty { padding: 48px 24px; text-align: center; color: var(--muted); font-size: 0.9rem; }
+
+/* Mobile */
+@media (max-width: 600px) {
+  .site-header { padding: 16px; }
+  .controls { padding: 10px 16px; }
+  th:nth-child(4), td:nth-child(4) { display: none; }
+  .td-path { max-width: 180px; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <h1>参政党 ウェブアーカイブ</h1>
+  <div class="meta">
+    <span>sanseito.jp</span>
+    <span id="range-meta">2020-04-12 〜 2026-09-11</span>
+    <span id="total-meta">376件</span>
+    <span>Wayback Machine</span>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="filter-row">
+    <span class="filter-label">カテゴリ</span>
+    <button class="btn-filter active" data-cat="all">すべて</button>
+    <button class="btn-filter" data-cat="top">トップページ</button>
+    <button class="btn-filter" data-cat="news">ニュース</button>
+    <button class="btn-filter" data-cat="policy">政策</button>
+    <span class="result-count" id="count-label">376 件</span>
+  </div>
+  <div class="filter-row">
+    <span class="filter-label">年</span>
+    <button class="btn-filter active" data-year="all">全年</button>
+    <button class="btn-filter" data-year="2020">2020</button>
+    <button class="btn-filter" data-year="2021">2021</button>
+    <button class="btn-filter" data-year="2022">2022</button>
+    <button class="btn-filter" data-year="2023">2023</button>
+    <button class="btn-filter" data-year="2024">2024</button>
+    <button class="btn-filter" data-year="2025">2025</button>
+    <button class="btn-filter" data-year="2026">2026</button>
+  </div>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>収録日</th>
+        <th>種別</th>
+        <th>パス</th>
+        <th>元URL</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  <p class="empty" id="empty" hidden>該当するアーカイブがありません</p>
+</div>
+
+<script>
+fetch('data.json').then(r=>r.json()).then(init);
+
+function init(data) {
+  let catFilter = 'all', yearFilter = 'all';
+
+  const catLabels = { top: 'トップページ', news: 'ニュース', policy: '政策', other: 'その他' };
+  const catChip = { top: 'chip-top', news: 'chip-news', policy: 'chip-policy', other: '' };
+
+  function render() {
+    const rows = data.filter(r =>
+      (catFilter === 'all' || r.cat === catFilter) &&
+      (yearFilter === 'all' || r.y === yearFilter)
+    );
+    const tbody = document.getElementById('tbody');
+    const empty = document.getElementById('empty');
+    document.getElementById('count-label').textContent = rows.length + ' 件';
+
+    if (rows.length === 0) {
+      tbody.innerHTML = '';
+      empty.hidden = false;
+      return;
+    }
+    empty.hidden = true;
+
+    const host = r => {
+      try { return new URL(r.url).hostname; } catch { return r.url; }
+    };
+
+    tbody.innerHTML = rows.map(r => {
+      const label = catLabels[r.cat] || r.cat;
+      const chip = catChip[r.cat] || '';
+      const path = r.path === '/' ? '/' : r.path;
+      return `<tr>
+        <td class="td-date">${r.d}</td>
+        <td class="td-cat"><span class="chip ${chip}">${label}</span></td>
+        <td class="td-path"><a href="${r.wb}" target="_blank" rel="noopener">${path}</a></td>
+        <td class="td-date">${host(r)}</td>
+        <td class="td-link"><a href="${r.wb}" target="_blank" rel="noopener">開く</a></td>
+      </tr>`;
+    }).join('');
+  }
+
+  document.querySelectorAll('[data-cat]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-cat]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      catFilter = btn.dataset.cat;
+      render();
+    });
+  });
+
+  document.querySelectorAll('[data-year]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-year]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      yearFilter = btn.dataset.year;
+      render();
+    });
+  });
+
+  render();
+}
+</script>
+</body>
+</html>
