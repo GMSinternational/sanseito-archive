@@ -16,215 +16,161 @@
   --muted: #6a6560;
   --accent: #1a3f7a;
   --accent-light: #e4eaf5;
-  --bar: #4a74b4;
-  --bar-dim: #b8c8e4;
   --green: #2e6e2e;
   --green-bg: #e4f0e4;
   --diff-pos: #c0392b;
   --diff-neg: #27ae60;
-  --src-wb: #1a3f7a;
-  --src-wb-bg: #e4eaf5;
-  --src-cc: #5a3a8a;
-  --src-cc-bg: #ede8f8;
-  --src-at: #8a3a1a;
-  --src-at-bg: #f8ece4;
+  --src-wb:  #1a3f7a; --src-wb-bg:  #e4eaf5;
+  --src-cc:  #5a3a8a; --src-cc-bg:  #ede8f8;
+  --src-at:  #8a3a1a; --src-at-bg:  #f8ece4;
   --sans: 'Noto Sans JP', system-ui, sans-serif;
   --serif: 'Noto Serif JP', serif;
   --mono: 'SFMono-Regular','Consolas',monospace;
+  --ctrl-h: 88px; /* controls bar height for sticky offset */
 }
+@media (max-width: 600px) { :root { --ctrl-h: 96px; } }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #111009;
-    --surface: #1a1816;
-    --surface2: #141210;
-    --border: #2a2822;
-    --border-soft: #222018;
-    --text: #e2ddd4;
-    --muted: #857f78;
-    --accent: #6090d8;
-    --accent-light: #162038;
-    --bar: #5a80c4;
-    --bar-dim: #2a3a5a;
-    --green: #5ab85a;
-    --green-bg: #182818;
-    --diff-pos: #e07060;
-    --diff-neg: #50c878;
-    --src-wb: #6090d8;
-    --src-wb-bg: #162038;
-    --src-cc: #a880e8;
-    --src-cc-bg: #281840;
-    --src-at: #e89060;
-    --src-at-bg: #401808;
+    --bg:#111009; --surface:#1a1816; --surface2:#141210;
+    --border:#2a2822; --border-soft:#222018;
+    --text:#e2ddd4; --muted:#857f78;
+    --accent:#6090d8; --accent-light:#162038;
+    --green:#5ab85a; --green-bg:#182818;
+    --diff-pos:#e07060; --diff-neg:#50c878;
+    --src-wb:#6090d8; --src-wb-bg:#162038;
+    --src-cc:#a880e8; --src-cc-bg:#281840;
+    --src-at:#e89060; --src-at-bg:#401808;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #111009;
-  --surface: #1a1816;
-  --surface2: #141210;
-  --border: #2a2822;
-  --border-soft: #222018;
-  --text: #e2ddd4;
-  --muted: #857f78;
-  --accent: #6090d8;
-  --accent-light: #162038;
-  --bar: #5a80c4;
-  --bar-dim: #2a3a5a;
-  --green: #5ab85a;
-  --green-bg: #182818;
-  --diff-pos: #e07060;
-  --diff-neg: #50c878;
-  --src-wb: #6090d8;
-  --src-wb-bg: #162038;
-  --src-cc: #a880e8;
-  --src-cc-bg: #281840;
-  --src-at: #e89060;
-  --src-at-bg: #401808;
+  --bg:#111009; --surface:#1a1816; --surface2:#141210;
+  --border:#2a2822; --border-soft:#222018;
+  --text:#e2ddd4; --muted:#857f78;
+  --accent:#6090d8; --accent-light:#162038;
+  --green:#5ab85a; --green-bg:#182818;
+  --diff-pos:#e07060; --diff-neg:#50c878;
+  --src-wb:#6090d8; --src-wb-bg:#162038;
+  --src-cc:#a880e8; --src-cc-bg:#281840;
+  --src-at:#e89060; --src-at-bg:#401808;
 }
-*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
-html { font-size:14px; }
-body { background:var(--bg); color:var(--text); font-family:var(--sans); line-height:1.6; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:14px;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.6;}
 
-/* Header */
-.hd {
-  background:var(--surface);
-  border-bottom:2px solid var(--accent);
-  padding:16px 24px 12px;
-  display:flex; align-items:baseline; gap:16px; flex-wrap:wrap;
+/* ── Header ── */
+.hd{background:var(--surface);border-bottom:2px solid var(--accent);padding:14px 20px 10px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;}
+.hd h1{font-family:var(--serif);font-size:1.2rem;font-weight:700;letter-spacing:.04em;flex-shrink:0;}
+.hd-meta{font-size:.74rem;color:var(--muted);font-family:var(--mono);display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.src-pill{font-size:.66rem;font-weight:500;padding:2px 7px;border-radius:10px;}
+.src-pill.wb{background:var(--src-wb-bg);color:var(--src-wb);}
+.src-pill.cc{background:var(--src-cc-bg);color:var(--src-cc);}
+.src-pill.at{background:var(--src-at-bg);color:var(--src-at);}
+
+/* ── Overview ── */
+.overview{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 20px 8px;}
+.ov-title{font-size:.68rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+.year-bars{display:flex;gap:8px;align-items:flex-end;height:48px;}
+.year-col{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;}
+.year-col:hover .year-label{color:var(--accent);}
+.year-col.active .year-label{color:var(--accent);font-weight:700;}
+.year-col.active .year-bar-wrap{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px;}
+.year-bar-wrap{display:flex;align-items:flex-end;height:34px;gap:2px;}
+.year-bar{width:10px;border-radius:2px 2px 0 0;}
+.year-bar.wb{background:var(--src-wb);}
+.year-bar.cc{background:var(--src-cc);}
+.year-bar.at{background:var(--src-at);}
+.year-bar.dim{background:var(--border);height:2px;}
+.year-label{font-size:.66rem;color:var(--muted);font-family:var(--mono);}
+.year-count{font-size:.6rem;color:var(--muted);font-family:var(--mono);}
+
+/* ── Controls ── */
+.controls{background:var(--surface);border-bottom:1px solid var(--border);padding:7px 20px;position:sticky;top:0;z-index:20;}
+.ctrl-row{display:flex;gap:5px;flex-wrap:wrap;align-items:center;min-height:28px;}
+.ctrl-row+.ctrl-row{margin-top:4px;}
+.fl{font-size:.68rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;min-width:2.5em;}
+.btn{font-family:var(--sans);font-size:.74rem;padding:2px 8px;border:1px solid var(--border);border-radius:3px;background:transparent;color:var(--muted);cursor:pointer;transition:background .1s,color .1s,border-color .1s;line-height:1.5;white-space:nowrap;}
+.btn:hover{border-color:var(--accent);color:var(--accent);}
+.btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.ctrl-right{margin-left:auto;display:flex;gap:8px;align-items:center;}
+.search-box{font-family:var(--mono);font-size:.74rem;padding:2px 8px;border:1px solid var(--border);border-radius:3px;background:var(--bg);color:var(--text);outline:none;width:160px;}
+.search-box:focus{border-color:var(--accent);}
+.c-info{font-size:.7rem;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;}
+
+/* ── Desktop Table ── */
+@media(min-width:601px){
+  .card-list{display:none;}
+  .tbl-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;}
+  thead{background:var(--surface2);position:sticky;top:var(--ctrl-h);z-index:10;}
+  th{font-size:.66rem;font-weight:500;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;text-align:left;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);}
+  th.r,td.r{text-align:right;}
+  td{padding:6px 10px;border-bottom:1px solid var(--border-soft);vertical-align:middle;}
+  tr.url-row{cursor:pointer;}
+  tr.url-row:hover td{background:var(--accent-light);}
+  tr.url-row.open td{background:var(--accent-light);}
+  tr.detail-row td{padding:0;}
+  .td-path{font-family:var(--mono);font-size:.76rem;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .td-host{font-size:.68rem;color:var(--muted);font-family:var(--mono);white-space:nowrap;}
+  .td-num{font-family:var(--mono);font-size:.78rem;font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .td-date{font-family:var(--mono);font-size:.7rem;color:var(--muted);white-space:nowrap;}
+  .src-dots{display:inline-flex;gap:3px;}
+  .src-dot{width:7px;height:7px;border-radius:50%;}
+  .src-dot.wb{background:var(--src-wb);}
+  .src-dot.cc{background:var(--src-cc);}
+  .src-dot.at{background:var(--src-at);}
+  .spark{display:inline-flex;gap:1px;align-items:flex-end;height:18px;vertical-align:middle;}
+  .spark-bar{width:4px;background:var(--border);border-radius:1px 1px 0 0;}
+  .spark-bar.wb{background:var(--src-wb);}
+  .spark-bar.cc{background:var(--src-cc);}
+  .spark-bar.at{background:var(--src-at);}
 }
-.hd h1 { font-family:var(--serif); font-size:1.25rem; font-weight:700; letter-spacing:.04em; flex-shrink:0; }
-.hd-meta { font-size:.76rem; color:var(--muted); font-family:var(--mono); display:flex; gap:14px; flex-wrap:wrap; align-items:center; }
 
-/* Source legend */
-.src-legend { display:flex; gap:8px; align-items:center; }
-.src-chip { display:inline-flex; align-items:center; gap:3px; font-size:.68rem; font-weight:500; padding:2px 7px; border-radius:10px; }
-.src-wb   { background:var(--src-wb-bg); color:var(--src-wb); }
-.src-cc   { background:var(--src-cc-bg); color:var(--src-cc); }
-.src-at   { background:var(--src-at-bg); color:var(--src-at); }
-
-/* Overview bars */
-.overview {
-  background:var(--surface);
-  border-bottom:1px solid var(--border);
-  padding:12px 24px 10px;
-  display:flex; gap:32px; align-items:flex-start; flex-wrap:wrap;
+/* ── Mobile Cards ── */
+@media(max-width:600px){
+  .tbl-wrap{display:none;}
+  .card-list{display:block;}
+  .card{background:var(--surface);border-bottom:1px solid var(--border-soft);padding:10px 16px;cursor:pointer;transition:background .1s;}
+  .card:hover{background:var(--accent-light);}
+  .card.open{background:var(--accent-light);border-left:3px solid var(--accent);}
+  .card-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px;}
+  .card-path{font-family:var(--mono);font-size:.78rem;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .card-meta{display:flex;gap:8px;align-items:center;font-size:.7rem;color:var(--muted);font-family:var(--mono);}
+  .card-detail{padding:0 0 0 12px;border-left:2px solid var(--border);}
 }
-.ov-section { }
-.ov-title { font-size:.7rem; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; margin-bottom:8px; }
-.year-bars { display:flex; gap:10px; align-items:flex-end; height:52px; }
-.year-col { display:flex; flex-direction:column; align-items:center; gap:3px; }
-.year-bar-wrap { display:flex; align-items:flex-end; height:38px; gap:2px; }
-.year-bar { width:12px; border-radius:2px 2px 0 0; cursor:default; }
-.year-bar.wb  { background:var(--src-wb); }
-.year-bar.cc  { background:var(--src-cc); }
-.year-bar.at  { background:var(--src-at); }
-.year-bar.dim { background:var(--bar-dim); }
-.year-label { font-size:.66rem; color:var(--muted); font-family:var(--mono); }
-.year-count { font-size:.62rem; color:var(--muted); font-family:var(--mono); }
 
-/* Controls */
-.controls {
-  background:var(--surface);
-  border-bottom:1px solid var(--border);
-  padding:8px 24px;
-  display:flex; gap:6px; flex-wrap:wrap; align-items:center;
-  position:sticky; top:0; z-index:20;
-}
-.filter-label { font-size:.7rem; color:var(--muted); letter-spacing:.06em; text-transform:uppercase; }
-.btn {
-  font-family:var(--sans); font-size:.76rem; padding:2px 9px;
-  border:1px solid var(--border); border-radius:3px;
-  background:transparent; color:var(--muted); cursor:pointer;
-  transition:background .1s,color .1s,border-color .1s; line-height:1.5;
-}
-.btn:hover { border-color:var(--accent); color:var(--accent); }
-.btn.active { background:var(--accent); border-color:var(--accent); color:#fff; }
-.sep { width:1px; height:18px; background:var(--border); margin:0 2px; }
-.search-box {
-  font-family:var(--mono); font-size:.76rem; padding:2px 9px;
-  border:1px solid var(--border); border-radius:3px;
-  background:var(--bg); color:var(--text); outline:none; width:180px;
-}
-.search-box:focus { border-color:var(--accent); }
-.c-info { font-size:.72rem; color:var(--muted); margin-left:auto; font-variant-numeric:tabular-nums; }
+/* ── Chip ── */
+.chip{display:inline-block;font-size:.64rem;font-weight:500;padding:1px 6px;border-radius:2px;}
+.chip-top{background:var(--green-bg);color:var(--green);}
+.chip-news{background:#fdf0e0;color:#7a4800;}
+.chip-policy{background:#f0e8f8;color:#4a1a7a;}
+.chip-election{background:#e8f0f8;color:#1a4a7a;}
+.chip-other{background:var(--surface2);color:var(--muted);}
 
-/* Table */
-.tbl-wrap { overflow-x:auto; }
-table { width:100%; border-collapse:collapse; }
-thead { background:var(--surface2); position:sticky; top:41px; z-index:10; }
-th {
-  font-size:.68rem; font-weight:500; color:var(--muted);
-  letter-spacing:.07em; text-transform:uppercase;
-  text-align:left; padding:7px 12px; white-space:nowrap;
-  border-bottom:1px solid var(--border);
-}
-th.r, td.r { text-align:right; }
-td { padding:7px 12px; border-bottom:1px solid var(--border-soft); vertical-align:middle; }
-tr.url-row { cursor:pointer; }
-tr.url-row:hover td { background:var(--accent-light); }
-tr.url-row.open td { background:var(--accent-light); }
-
-.td-path { font-family:var(--mono); font-size:.78rem; max-width:360px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.td-host { font-size:.7rem; color:var(--muted); font-family:var(--mono); white-space:nowrap; }
-.td-num  { font-family:var(--mono); font-size:.8rem; font-variant-numeric:tabular-nums; white-space:nowrap; }
-.td-date { font-family:var(--mono); font-size:.72rem; color:var(--muted); white-space:nowrap; }
-
-.chip { display:inline-block; font-size:.65rem; font-weight:500; padding:1px 6px; border-radius:2px; }
-.chip-top      { background:var(--green-bg); color:var(--green); }
-.chip-news     { background:#fdf0e0; color:#7a4800; }
-.chip-policy   { background:#f0e8f8; color:#4a1a7a; }
-.chip-election { background:#e8f0f8; color:#1a4a7a; }
-.chip-other    { background:var(--surface2); color:var(--muted); }
-
-/* Sparkline */
-.spark { display:inline-flex; gap:1px; align-items:flex-end; height:20px; vertical-align:middle; }
-.spark-bar { width:4px; background:var(--bar-dim); border-radius:1px 1px 0 0; }
-.spark-bar.wb { background:var(--src-wb); }
-.spark-bar.cc { background:var(--src-cc); }
-.spark-bar.at { background:var(--src-at); }
-
-/* Source icons in table */
-.src-dots { display:inline-flex; gap:3px; }
-.src-dot { width:7px; height:7px; border-radius:50%; }
-.src-dot.wb { background:var(--src-wb); }
-.src-dot.cc { background:var(--src-cc); }
-.src-dot.at { background:var(--src-at); }
-
-/* Expand rows */
-tr.detail-row td { padding:0; }
-.detail-inner {
-  padding:0 12px 16px 32px;
-  background:var(--surface);
-  border-bottom:2px solid var(--accent);
-}
-.tl { list-style:none; border-left:2px solid var(--border); margin-left:8px; padding:8px 0; }
-.tl li { position:relative; padding:6px 0 6px 20px; }
-.tl li::before {
-  content:''; position:absolute; left:-5px; top:12px;
-  width:8px; height:8px; border-radius:50%;
-  background:var(--src-wb); border:2px solid var(--surface);
-}
-.tl li.src-cc::before { background:var(--src-cc); }
-.tl li.src-at::before { background:var(--src-at); }
-.tl li.first-snap::before { background:var(--green); }
-.tl-d { font-family:var(--mono); font-size:.78rem; font-weight:500; margin-right:8px; }
-.tl-src { font-size:.65rem; padding:1px 5px; border-radius:8px; margin-right:6px; }
-.tl-src.wb { background:var(--src-wb-bg); color:var(--src-wb); }
-.tl-src.cc { background:var(--src-cc-bg); color:var(--src-cc); }
-.tl-src.at { background:var(--src-at-bg); color:var(--src-at); }
-.tl-actions { display:inline-flex; gap:6px; align-items:center; flex-wrap:wrap; }
-.tl-a {
-  font-size:.72rem; color:var(--accent); border:1px solid var(--accent);
-  padding:1px 8px; border-radius:2px; text-decoration:none; white-space:nowrap;
-  transition:background .1s,color .1s;
-}
-.tl-a:hover { background:var(--accent); color:#fff; }
-.tl-a.diff { border-color:var(--muted); color:var(--muted); }
-.tl-a.diff:hover { background:var(--muted); color:#fff; }
-.tl-sz { font-size:.7rem; font-family:var(--mono); }
-.tl-sz.pos { color:var(--diff-pos); }
-.tl-sz.neg { color:var(--diff-neg); }
-
-.empty { padding:40px; text-align:center; color:var(--muted); }
+/* ── Detail panel (shared) ── */
+.detail-inner{padding:4px 12px 14px 28px;background:var(--surface);border-bottom:2px solid var(--accent);}
+.detail-links{margin-bottom:8px;display:flex;gap:8px;flex-wrap:wrap;}
+.btn-live{font-size:.74rem;background:var(--green-bg);color:var(--green);border:1px solid var(--green);padding:2px 10px;border-radius:3px;text-decoration:none;transition:background .1s,color .1s;}
+.btn-live:hover{background:var(--green);color:#fff;}
+.tl{list-style:none;border-left:2px solid var(--border);padding:6px 0;}
+.tl li{position:relative;padding:5px 0 5px 18px;}
+.tl li::before{content:'';position:absolute;left:-5px;top:10px;width:8px;height:8px;border-radius:50%;background:var(--src-wb);border:2px solid var(--surface);}
+.tl li.src-cc::before{background:var(--src-cc);}
+.tl li.src-at::before{background:var(--src-at);}
+.tl li.first-snap::before{background:var(--green);}
+.tl-d{font-family:var(--mono);font-size:.76rem;font-weight:500;margin-right:6px;}
+.tl-src{font-size:.62rem;padding:1px 5px;border-radius:8px;margin-right:5px;}
+.tl-src.wb{background:var(--src-wb-bg);color:var(--src-wb);}
+.tl-src.cc{background:var(--src-cc-bg);color:var(--src-cc);}
+.tl-src.at{background:var(--src-at-bg);color:var(--src-at);}
+.tl-actions{display:inline-flex;gap:5px;align-items:center;flex-wrap:wrap;}
+.tl-a{font-size:.7rem;color:var(--accent);border:1px solid var(--accent);padding:1px 7px;border-radius:2px;text-decoration:none;white-space:nowrap;transition:background .1s,color .1s;}
+.tl-a:hover{background:var(--accent);color:#fff;}
+.tl-a.diff{border-color:var(--muted);color:var(--muted);}
+.tl-a.diff:hover{background:var(--muted);color:#fff;}
+.tl-sz{font-size:.68rem;font-family:var(--mono);}
+.tl-sz.pos{color:var(--diff-pos);}
+.tl-sz.neg{color:var(--diff-neg);}
+.empty{padding:40px;text-align:center;color:var(--muted);}
 </style>
 </head>
 <body>
@@ -235,40 +181,50 @@ tr.detail-row td { padding:0; }
     <span>sanseito.jp</span>
     <span id="range-meta"></span>
     <span id="total-meta"></span>
-    <div class="src-legend">
-      <span class="src-chip src-wb">Wayback</span>
-      <span class="src-chip src-cc">CommonCrawl</span>
-      <span class="src-chip src-at">archive.today</span>
-    </div>
+    <span class="src-pill wb">Wayback</span>
+    <span class="src-pill cc">CommonCrawl</span>
+    <span class="src-pill at">archive.today</span>
   </div>
 </header>
 
 <div class="overview">
-  <div class="ov-section">
-    <div class="ov-title">年別 スナップショット数（ソース別）</div>
-    <div class="year-bars" id="year-bars"></div>
+  <div class="ov-title">年別 スナップショット数（クリックで絞り込み）</div>
+  <div class="year-bars" id="year-bars"></div>
+</div>
+
+<div class="controls" id="controls">
+  <div class="ctrl-row">
+    <span class="fl">種別</span>
+    <button class="btn active" data-cat="all">すべて</button>
+    <button class="btn" data-cat="top">トップ</button>
+    <button class="btn" data-cat="news">ニュース</button>
+    <button class="btn" data-cat="policy">政策</button>
+    <button class="btn" data-cat="election">選挙</button>
+    <button class="btn" data-cat="other">その他</button>
+    <div class="ctrl-right">
+      <input class="search-box" type="text" id="search" placeholder="パスで絞り込み…" autocomplete="off">
+      <span class="c-info" id="c-info"></span>
+    </div>
+  </div>
+  <div class="ctrl-row">
+    <span class="fl">ソース</span>
+    <button class="btn active" data-src="all">すべて</button>
+    <button class="btn" data-src="wayback">Wayback</button>
+    <button class="btn" data-src="commoncrawl">CC</button>
+    <button class="btn" data-src="archive.today">archive.today</button>
+    <span style="margin-left:8px;font-size:.68rem;color:var(--muted);">年</span>
+    <button class="btn active" data-year="all">全年</button>
+    <button class="btn" data-year="2020">2020</button>
+    <button class="btn" data-year="2021">2021</button>
+    <button class="btn" data-year="2022">2022</button>
+    <button class="btn" data-year="2023">2023</button>
+    <button class="btn" data-year="2024">2024</button>
+    <button class="btn" data-year="2025">2025</button>
+    <button class="btn" data-year="2026">2026</button>
   </div>
 </div>
 
-<div class="controls">
-  <span class="filter-label">種別</span>
-  <button class="btn active" data-cat="all">すべて</button>
-  <button class="btn" data-cat="top">トップ</button>
-  <button class="btn" data-cat="news">ニュース</button>
-  <button class="btn" data-cat="policy">政策</button>
-  <button class="btn" data-cat="election">選挙</button>
-  <button class="btn" data-cat="other">その他</button>
-  <div class="sep"></div>
-  <span class="filter-label">ソース</span>
-  <button class="btn active" data-src="all">すべて</button>
-  <button class="btn" data-src="wayback">Wayback</button>
-  <button class="btn" data-src="commoncrawl">CC</button>
-  <button class="btn" data-src="archive.today">archive.today</button>
-  <div class="sep"></div>
-  <input class="search-box" type="text" id="search" placeholder="パスで絞り込み…" autocomplete="off">
-  <span class="c-info" id="c-info"></span>
-</div>
-
+<!-- Desktop table -->
 <div class="tbl-wrap">
 <table>
   <thead>
@@ -278,15 +234,20 @@ tr.detail-row td { padding:0; }
       <th>種別</th>
       <th>ソース</th>
       <th class="r">件数</th>
-      <th>年別分布</th>
+      <th>年別</th>
       <th>初回</th>
       <th>最終</th>
+      <th>現在</th>
     </tr>
   </thead>
   <tbody id="tbody"></tbody>
 </table>
 <div class="empty" id="empty" hidden>該当なし</div>
 </div>
+
+<!-- Mobile cards -->
+<div class="card-list" id="card-list"></div>
+<div class="empty" id="empty-m" hidden>該当なし</div>
 
 <script>
 const YEARS = ['2020','2021','2022','2023','2024','2025','2026'];
@@ -295,178 +256,211 @@ const CAT_CHIP  = {top:'chip-top',news:'chip-news',policy:'chip-policy',election
 const SRC_LABEL = {wayback:'Wayback',commoncrawl:'CC','archive.today':'archive.today'};
 const SRC_CLS   = {wayback:'wb',commoncrawl:'cc','archive.today':'at'};
 
-let allPages = [], filtered = [], openPath = null;
-let catFilter = 'all', srcFilter = 'all';
+let allPages=[], filtered=[], openPath=null;
+let catFilter='all', srcFilter='all', yearFilter='all';
 
-fetch('data.json').then(r=>r.json()).then(data => {
-  allPages = data;
-  initMeta();
-  initOverview();
-  applyFilter();
+// sticky offset
+function updateCtrlHeight() {
+  const h = document.getElementById('controls').offsetHeight;
+  document.documentElement.style.setProperty('--ctrl-h', h+'px');
+}
+
+fetch('data.json').then(r=>r.json()).then(data=>{
+  allPages=data;
+  initMeta(); initOverview(); applyFilter();
+  updateCtrlHeight();
+  window.addEventListener('resize', updateCtrlHeight);
 });
 
 function initMeta() {
-  const totalEv = allPages.reduce((s,p)=>s+p.count,0);
-  document.getElementById('total-meta').textContent = allPages.length + 'URL / ' + totalEv + '件';
+  const total = allPages.reduce((s,p)=>s+p.count,0);
+  document.getElementById('total-meta').textContent = allPages.length+'URL / '+total+'件';
   const dates = allPages.flatMap(p=>[p.first,p.last]).filter(Boolean).sort();
-  if (dates.length) document.getElementById('range-meta').textContent = dates[0] + ' 〜 ' + dates[dates.length-1];
+  if (dates.length) document.getElementById('range-meta').textContent = dates[0]+' 〜 '+dates[dates.length-1];
 }
 
 function initOverview() {
-  const byYear = {};
-  YEARS.forEach(y => byYear[y] = {wb:0,cc:0,at:0,total:0});
-  allPages.forEach(p => p.changes.forEach(c => {
-    const y = c.y;
-    if (!byYear[y]) return;
-    const s = c.source === 'wayback' ? 'wb' : c.source === 'commoncrawl' ? 'cc' : 'at';
-    byYear[y][s]++;
-    byYear[y].total++;
+  const by = {};
+  YEARS.forEach(y=>by[y]={wb:0,cc:0,at:0,total:0});
+  allPages.forEach(p=>p.changes.forEach(c=>{
+    const y=c.y; if(!by[y]) return;
+    const s=SRC_CLS[c.source]||'wb';
+    by[y][s]++; by[y].total++;
   }));
-  const max = Math.max(...YEARS.map(y=>byYear[y].total), 1);
-  document.getElementById('year-bars').innerHTML = YEARS.map(y => {
-    const d = byYear[y];
-    const scale = h => Math.round((h/max)*38);
-    const barsHtml = d.total > 0
-      ? ['wb','cc','at'].filter(s=>d[s]>0).map(s =>
-          `<div class="year-bar ${s}" style="height:${Math.max(scale(d[s]),2)}px" title="${SRC_LABEL[s==='wb'?'wayback':s==='cc'?'commoncrawl':'archive.today']}: ${d[s]}件"></div>`
+  const max=Math.max(...YEARS.map(y=>by[y].total),1);
+  document.getElementById('year-bars').innerHTML = YEARS.map(y=>{
+    const d=by[y];
+    const barsHtml = d.total>0
+      ? ['wb','cc','at'].filter(s=>d[s]>0).map(s=>
+          `<div class="year-bar ${s}" style="height:${Math.max(Math.round(d[s]/max*32),2)}px" title="${s}:${d[s]}"></div>`
         ).join('')
-      : `<div class="year-bar dim" style="height:2px"></div>`;
-    return `<div class="year-col">
+      : `<div class="year-bar dim"></div>`;
+    return `<div class="year-col" data-bar-year="${y}" onclick="clickYearBar('${y}')">
       <div class="year-bar-wrap">${barsHtml}</div>
       <div class="year-label">${y.slice(2)}</div>
-      <div class="year-count">${d.total||''}</div>
+      <div class="year-count">${d.total||'-'}</div>
     </div>`;
   }).join('');
 }
 
-function pageHasSrc(p, src) {
-  if (src === 'all') return true;
-  return p.changes.some(c => c.source === src);
+function clickYearBar(y) {
+  yearFilter = (yearFilter===y) ? 'all' : y;
+  document.querySelectorAll('[data-year]').forEach(b=>{
+    b.classList.toggle('active', b.dataset.year===(yearFilter||'all'));
+  });
+  document.querySelectorAll('.year-col').forEach(c=>{
+    c.classList.toggle('active', c.dataset.barYear===yearFilter);
+  });
+  openPath=null; applyFilter();
+}
+
+function filteredChanges(p) {
+  let chs = p.changes;
+  if (srcFilter!=='all') chs = chs.filter(c=>c.source===srcFilter);
+  if (yearFilter!=='all') chs = chs.filter(c=>c.y===yearFilter);
+  return chs;
 }
 
 function applyFilter() {
-  const q = document.getElementById('search').value.trim().toLowerCase();
-  filtered = allPages.filter(p => {
-    if (catFilter !== 'all' && p.cat !== catFilter) return false;
-    if (!pageHasSrc(p, srcFilter)) return false;
+  const q=document.getElementById('search').value.trim().toLowerCase();
+  filtered = allPages.filter(p=>{
+    if (catFilter!=='all' && p.cat!==catFilter) return false;
     if (q && !p.url.toLowerCase().includes(q) && !p.path.toLowerCase().includes(q)) return false;
-    return true;
+    const chs=filteredChanges(p);
+    return chs.length>0;
   });
-  const totalEv = filtered.reduce((s,p)=>s+filteredCount(p),0);
-  document.getElementById('c-info').textContent = filtered.length + 'URL / ' + totalEv + '件';
-  renderTable();
-}
-
-function filteredCount(p) {
-  if (srcFilter === 'all') return p.count;
-  return p.changes.filter(c => c.source === srcFilter).length;
+  const total=filtered.reduce((s,p)=>s+filteredChanges(p).length,0);
+  document.getElementById('c-info').textContent = filtered.length+'URL / '+total+'件';
+  renderTable(); renderCards();
 }
 
 function srcDots(changes) {
-  const srcs = new Set(changes.map(c=>c.source));
-  return '<div class="src-dots">' + [...srcs].map(s => {
-    const cls = SRC_CLS[s] || '';
-    return `<div class="src-dot ${cls}" title="${SRC_LABEL[s]||s}"></div>`;
-  }).join('') + '</div>';
+  const srcs=[...new Set(changes.map(c=>c.source))];
+  return srcs.map(s=>`<div class="src-dot ${SRC_CLS[s]||''}" title="${SRC_LABEL[s]||s}"></div>`).join('');
 }
 
 function sparkHtml(changes) {
-  const byYear = {};
-  YEARS.forEach(y => byYear[y] = {wb:0,cc:0,at:0,total:0});
-  const chs = srcFilter === 'all' ? changes : changes.filter(c=>c.source===srcFilter);
-  chs.forEach(c => {
-    const y = c.y;
-    if (!byYear[y]) return;
-    const s = SRC_CLS[c.source] || 'wb';
-    byYear[y][s]++;
-    byYear[y].total++;
-  });
-  const max = Math.max(...YEARS.map(y=>byYear[y].total), 1);
-  return '<div class="spark">' + YEARS.map(y => {
-    const d = byYear[y];
-    const h = Math.max(Math.round((d.total/max)*18), d.total>0?2:0);
-    // 支配的ソースの色
-    const cls = d.cc > d.wb && d.cc > d.at ? 'cc' : d.at > d.wb ? 'at' : d.total>0 ? 'wb' : '';
+  const by={};YEARS.forEach(y=>by[y]={wb:0,cc:0,at:0,total:0});
+  changes.forEach(c=>{const y=c.y;if(!by[y])return;const s=SRC_CLS[c.source]||'wb';by[y][s]++;by[y].total++;});
+  const max=Math.max(...YEARS.map(y=>by[y].total),1);
+  return YEARS.map(y=>{
+    const d=by[y];
+    const h=Math.max(Math.round(d.total/max*16),d.total>0?2:0);
+    const cls=d.cc>d.wb&&d.cc>d.at?'cc':d.at>d.wb?'at':d.total>0?'wb':'';
     return `<div class="spark-bar ${cls}" style="height:${Math.max(h,1)}px" title="${y}:${d.total}"></div>`;
-  }).join('') + '</div>';
+  }).join('');
+}
+
+function liveLink(url) {
+  return `<a href="${url}" target="_blank" rel="noopener" class="btn-live">現在のページ</a>`;
+}
+
+function detailHtml(p) {
+  const chs = filteredChanges(p);
+  const tlHtml = chs.map((c,i)=>{
+    const isFirst=i===0;
+    const srcCls=SRC_CLS[c.source]||'wb';
+    const srcLbl=SRC_LABEL[c.source]||c.source;
+    let szHtml='';
+    if(c.diffFmt){const cls=c.diff>0?'pos':c.diff<0?'neg':'';szHtml=`<span class="tl-sz ${cls}">${c.diffFmt}</span>`;}
+    else if(c.bytes){szHtml=`<span class="tl-sz">${(c.bytes/1024).toFixed(1)}KB</span>`;}
+    const diffLink=c.diffUrl?`<a class="tl-a diff" href="${c.diffUrl}" target="_blank" rel="noopener">差分</a>`:'';
+    const viewLink=c.wb?`<a class="tl-a" href="${c.wb}" target="_blank" rel="noopener">表示</a>`:'';
+    return `<li class="${isFirst?'first-snap':''} src-${srcCls}">
+      <span class="tl-d">${c.d}</span><span class="tl-src ${srcCls}">${srcLbl}</span>
+      <span class="tl-actions">${viewLink}${diffLink}${szHtml}</span>
+    </li>`;
+  }).join('');
+  return `<div class="detail-inner">
+    <div class="detail-links">${liveLink(p.url)}</div>
+    <ul class="tl">${tlHtml}</ul>
+  </div>`;
 }
 
 function renderTable() {
-  const tbody = document.getElementById('tbody');
-  const empty = document.getElementById('empty');
-  if (!filtered.length) { tbody.innerHTML=''; empty.hidden=false; return; }
-  empty.hidden = true;
-
-  tbody.innerHTML = filtered.map(p => {
-    const chipCls = CAT_CHIP[p.cat]||'chip-other';
-    const label   = CAT_LABEL[p.cat]||p.cat;
-    const isOpen  = openPath === p.url;
-    const cnt     = filteredCount(p);
-
-    const rowHtml = `<tr class="url-row${isOpen?' open':''}" onclick="toggleRow('${p.url.replace(/'/g,"\\'")}')">
+  const tbody=document.getElementById('tbody');
+  const empty=document.getElementById('empty');
+  if(!filtered.length){tbody.innerHTML='';empty.hidden=false;return;}
+  empty.hidden=true;
+  tbody.innerHTML=filtered.map(p=>{
+    const chs=filteredChanges(p);
+    const chipCls=CAT_CHIP[p.cat]||'chip-other';
+    const label=CAT_LABEL[p.cat]||p.cat;
+    const isOpen=openPath===p.url;
+    const rowHtml=`<tr class="url-row${isOpen?' open':''}" onclick="toggleRow('${p.url.replace(/'/g,"\\'")}')">
       <td class="td-path" title="${p.url}">${p.path}</td>
       <td class="td-host">${p.host}</td>
       <td><span class="chip ${chipCls}">${label}</span></td>
-      <td>${srcDots(p.changes)}</td>
-      <td class="td-num r">${cnt}</td>
-      <td>${sparkHtml(p.changes)}</td>
-      <td class="td-date">${p.first}</td>
-      <td class="td-date">${p.last}</td>
+      <td><div class="src-dots">${srcDots(chs)}</div></td>
+      <td class="td-num r">${chs.length}</td>
+      <td><div class="spark">${sparkHtml(chs)}</div></td>
+      <td class="td-date">${chs[0]?.d||''}</td>
+      <td class="td-date">${chs[chs.length-1]?.d||''}</td>
+      <td><a href="${p.url}" target="_blank" rel="noopener" class="btn-live" onclick="event.stopPropagation()">現在</a></td>
     </tr>`;
+    if(!isOpen) return rowHtml;
+    return rowHtml+`<tr class="detail-row"><td colspan="9">${detailHtml(p)}</td></tr>`;
+  }).join('');
+}
 
-    if (!isOpen) return rowHtml;
-
-    const chs = srcFilter === 'all' ? p.changes : p.changes.filter(c=>c.source===srcFilter);
-    const tlHtml = chs.map((c,i) => {
-      const isFirst = i===0;
-      const srcCls  = SRC_CLS[c.source] || 'wb';
-      const srcLbl  = SRC_LABEL[c.source] || c.source;
-      let szHtml = '';
-      if (c.diffFmt) {
-        const cls = c.diff > 0 ? 'pos' : c.diff < 0 ? 'neg' : '';
-        szHtml = `<span class="tl-sz ${cls}">${c.diffFmt}</span>`;
-      } else if (c.bytes) {
-        szHtml = `<span class="tl-sz">${(c.bytes/1024).toFixed(1)}KB</span>`;
-      }
-      const diffLink = c.diffUrl
-        ? `<a class="tl-a diff" href="${c.diffUrl}" target="_blank" rel="noopener">差分</a>` : '';
-      const viewLink = c.wb
-        ? `<a class="tl-a" href="${c.wb}" target="_blank" rel="noopener">表示</a>` : '';
-      return `<li class="${isFirst?'first-snap':''} src-${srcCls}">
-        <span class="tl-d">${c.d}</span>
-        <span class="tl-src ${srcCls}">${srcLbl}</span>
-        <span class="tl-actions">${viewLink}${diffLink}${szHtml}</span>
-      </li>`;
-    }).join('');
-
-    return rowHtml + `<tr class="detail-row"><td colspan="8">
-      <div class="detail-inner"><ul class="tl">${tlHtml}</ul></div>
-    </td></tr>`;
+function renderCards() {
+  const list=document.getElementById('card-list');
+  const empty=document.getElementById('empty-m');
+  if(!filtered.length){list.innerHTML='';empty.hidden=false;return;}
+  empty.hidden=true;
+  list.innerHTML=filtered.map(p=>{
+    const chs=filteredChanges(p);
+    const chipCls=CAT_CHIP[p.cat]||'chip-other';
+    const label=CAT_LABEL[p.cat]||p.cat;
+    const isOpen=openPath===p.url;
+    const cardHtml=`<div class="card${isOpen?' open':''}" onclick="toggleRow('${p.url.replace(/'/g,"\\'")}')">
+      <div class="card-top">
+        <span class="chip ${chipCls}">${label}</span>
+        <span class="card-path">${p.path}</span>
+        <span style="font-size:.7rem;color:var(--muted);font-family:var(--mono);white-space:nowrap">${chs.length}件</span>
+      </div>
+      <div class="card-meta">
+        <span>${chs[0]?.d||''}</span><span>〜</span><span>${chs[chs.length-1]?.d||''}</span>
+        <div class="src-dots">${srcDots(chs)}</div>
+      </div>
+    </div>`;
+    if(!isOpen) return cardHtml;
+    return cardHtml+`<div>${detailHtml(p)}</div>`;
   }).join('');
 }
 
 function toggleRow(url) {
-  openPath = (openPath === url) ? null : url;
-  renderTable();
-  if (openPath) {
-    const el = document.querySelector('tr.url-row.open');
-    if (el) setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
+  openPath=(openPath===url)?null:url;
+  renderTable(); renderCards();
+  if(openPath){
+    const el=document.querySelector('.url-row.open, .card.open');
+    if(el) setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
   }
 }
 
-document.querySelectorAll('[data-cat]').forEach(btn => {
-  btn.addEventListener('click', () => {
+// filters
+document.querySelectorAll('[data-cat]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
     document.querySelectorAll('[data-cat]').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active'); catFilter = btn.dataset.cat; openPath=null; applyFilter();
+    btn.classList.add('active'); catFilter=btn.dataset.cat; openPath=null; applyFilter();
   });
 });
-document.querySelectorAll('[data-src]').forEach(btn => {
-  btn.addEventListener('click', () => {
+document.querySelectorAll('[data-src]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
     document.querySelectorAll('[data-src]').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active'); srcFilter = btn.dataset.src; openPath=null; applyFilter();
+    btn.classList.add('active'); srcFilter=btn.dataset.src; openPath=null; applyFilter();
   });
 });
-document.getElementById('search').addEventListener('input', ()=>{openPath=null;applyFilter();});
+document.querySelectorAll('[data-year]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const y=btn.dataset.year;
+    yearFilter=(yearFilter===y&&y!=='all')?'all':y;
+    document.querySelectorAll('[data-year]').forEach(b=>b.classList.toggle('active',b.dataset.year===(yearFilter||'all')));
+    document.querySelectorAll('.year-col').forEach(c=>c.classList.toggle('active',c.dataset.barYear===yearFilter));
+    openPath=null; applyFilter();
+  });
+});
+document.getElementById('search').addEventListener('input',()=>{openPath=null;applyFilter();});
 </script>
 </body>
 </html>
