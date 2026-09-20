@@ -213,7 +213,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:
     <button class="btn" data-src="wayback">Wayback</button>
     <button class="btn" data-src="commoncrawl">CC</button>
     <button class="btn" data-src="archive.today">archive.today</button>
-    <span style="font-size:.62rem;color:var(--muted);margin-left:4px;">※展開時のみ反映</span>
     <span style="margin-left:8px;font-size:.68rem;color:var(--muted);">年</span>
     <button class="btn active" data-year="all">全年</button>
     <button class="btn" data-year="2020">2020</button>
@@ -356,6 +355,7 @@ function applyFilter() {
       const ly = p.last  ? p.last.slice(0,4)  : '';
       if (!fy || fy > yearFilter || ly < yearFilter) return false;
     }
+    if (srcFilter!=='all' && !(p.srcs||[]).includes(srcFilter)) return false;
     if (q && !p.url.toLowerCase().includes(q) && !p.path.toLowerCase().includes(q)) return false;
     return true;
   });
