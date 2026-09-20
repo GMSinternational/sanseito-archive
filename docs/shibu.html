@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>「支部」用例 — 参政党アーカイブ</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@700&family=Noto+Sans+JP:wght@400;500&display=swap">
+<style>
+:root {
+  --bg:#f2efe8; --surface:#fafaf7; --surface2:#f0ede6;
+  --border:#d8d3ca; --text:#1c1a17; --muted:#6a6560;
+  --accent:#1a3f7a; --accent-light:#e4eaf5;
+  --hit:#7a1a1a; --hit-bg:#f8ece8;
+  --sans:'Noto Sans JP',system-ui,sans-serif;
+  --serif:'Noto Serif JP',serif;
+  --mono:'SFMono-Regular','Consolas',monospace;
+}
+@media (prefers-color-scheme:dark) {
+  :root:not([data-theme="light"]) {
+    --bg:#111009; --surface:#1a1816; --surface2:#141210;
+    --border:#2a2822; --text:#e2ddd4; --muted:#857f78;
+    --accent:#6090d8; --accent-light:#162038;
+    --hit:#e07060; --hit-bg:#2a1010;
+  }
+}
+:root[data-theme="dark"] {
+  --bg:#111009; --surface:#1a1816; --surface2:#141210;
+  --border:#2a2822; --text:#e2ddd4; --muted:#857f78;
+  --accent:#6090d8; --accent-light:#162038;
+  --hit:#e07060; --hit-bg:#2a1010;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:14px;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.6;}
+.hd{background:var(--surface);border-bottom:2px solid var(--accent);padding:14px 20px 10px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;}
+.hd h1{font-family:var(--serif);font-size:1.2rem;font-weight:700;}
+.hd-sub{font-size:.78rem;color:var(--muted);}
+.hd a{font-size:.78rem;color:var(--accent);text-decoration:none;margin-left:auto;}
+.hd a:hover{text-decoration:underline;}
+.controls{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 20px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:10;}
+.search-box{font-size:.82rem;padding:4px 8px;border:1px solid var(--border);border-radius:3px;background:var(--surface2);color:var(--text);width:220px;}
+.c-info{font-size:.72rem;color:var(--muted);font-family:var(--mono);}
+.list{max-width:900px;margin:0 auto;padding:12px 16px;}
+.entry{background:var(--surface);border:1px solid var(--border);border-radius:4px;margin-bottom:10px;overflow:hidden;}
+.entry-head{padding:8px 12px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;cursor:pointer;user-select:none;}
+.entry-head:hover{background:var(--accent-light);}
+.entry-date{font-size:.72rem;font-family:var(--mono);color:var(--muted);white-space:nowrap;}
+.entry-url{font-size:.78rem;color:var(--accent);word-break:break-all;flex:1;}
+.entry-hits{font-size:.72rem;font-family:var(--mono);background:var(--hit-bg);color:var(--hit);padding:1px 6px;border-radius:10px;white-space:nowrap;}
+.entry-wb{font-size:.72rem;color:var(--accent);text-decoration:none;white-space:nowrap;}
+.entry-wb:hover{text-decoration:underline;}
+.entry-body{padding:8px 12px 12px;border-top:1px solid var(--border);display:none;}
+.entry.open .entry-body{display:block;}
+.sents{list-style:none;display:flex;flex-direction:column;gap:6px;}
+.sents li{font-size:.82rem;line-height:1.7;padding:5px 8px;background:var(--surface2);border-radius:3px;border-left:3px solid var(--hit);}
+mark{background:var(--hit-bg);color:var(--hit);font-weight:700;border-radius:2px;padding:0 1px;}
+.empty{text-align:center;padding:40px;color:var(--muted);font-size:.88rem;}
+.more-wrap{text-align:center;padding:12px 0;}
+.btn{font-size:.8rem;padding:5px 16px;background:var(--surface);border:1px solid var(--border);border-radius:3px;color:var(--text);cursor:pointer;}
+.btn:hover{background:var(--accent-light);border-color:var(--accent);color:var(--accent);}
+</style>
+</head>
+<body>
+<div class="hd">
+  <h1>「支部」用例</h1>
+  <span class="hd-sub">参政党サイト / 2021-09-20 以前のスナップショット</span>
+  <a href="index.html">← 変化ログへ</a>
+</div>
+<div class="controls">
+  <input class="search-box" type="text" id="search" placeholder="URL・本文で絞り込み…" autocomplete="off">
+  <span class="c-info" id="c-info"></span>
+</div>
+<div class="list" id="list"></div>
+<div class="empty" id="empty" hidden>該当なし</div>
+<div class="more-wrap" id="more-wrap" style="display:none;">
+  <button class="btn" onclick="loadMore()">さらに表示</button>
+  <span class="c-info" id="more-info" style="margin-left:8px;"></span>
+</div>
+
+<script>
+let allData=[], filtered=[], pageOffset=0;
+const PAGE=50;
+
+function hl(s){
+  return s.replace(/支部/g,'<mark>支部</mark>');
+}
+
+function entryHtml(d) {
+  const isOpen = false;
+  const sentsHtml = d.sentences.map(s=>`<li>${hl(s)}</li>`).join('');
+  return `<div class="entry" id="e-${d.ts}">
+    <div class="entry-head" onclick="toggle('${d.ts}')">
+      <span class="entry-date">${d.date}</span>
+      <span class="entry-url">${d.url}</span>
+      <span class="entry-hits">${d.hits}件</span>
+      <a class="entry-wb" href="${d.wb}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Wayback</a>
+    </div>
+    <div class="entry-body">
+      <ul class="sents">${sentsHtml}</ul>
+    </div>
+  </div>`;
+}
+
+function toggle(ts) {
+  const el = document.getElementById('e-'+ts);
+  if(el) el.classList.toggle('open');
+}
+
+function render() {
+  const list = document.getElementById('list');
+  const empty = document.getElementById('empty');
+  if(!filtered.length){list.innerHTML='';empty.hidden=false;updateMore();return;}
+  empty.hidden=true;
+  const slice = filtered.slice(0, pageOffset+PAGE);
+  list.innerHTML = slice.map(entryHtml).join('');
+  updateMore();
+}
+
+function updateMore() {
+  const wrap = document.getElementById('more-wrap');
+  const shown = Math.min(pageOffset+PAGE, filtered.length);
+  if(shown < filtered.length){
+    wrap.style.display='block';
+    document.getElementById('more-info').textContent = shown+' / '+filtered.length+'件表示中';
+  } else {
+    wrap.style.display='none';
+  }
+}
+
+function loadMore(){pageOffset+=PAGE;render();}
+
+function applyFilter(){
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  filtered = allData.filter(d=>{
+    if(!q) return true;
+    if(d.url.toLowerCase().includes(q)) return true;
+    if(d.sentences.some(s=>s.toLowerCase().includes(q))) return true;
+    return false;
+  });
+  pageOffset=0;
+  document.getElementById('c-info').textContent = filtered.length+'件';
+  render();
+}
+
+fetch('shibu_results.json').then(r=>r.json()).then(data=>{
+  allData = data;
+  filtered = data;
+  document.getElementById('c-info').textContent = data.length+'件';
+  render();
+});
+
+document.getElementById('search').addEventListener('input', applyFilter);
+</script>
+</body>
+</html>
