@@ -145,6 +145,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:
 .chip-policy{background:#f0e8f8;color:#4a1a7a;}
 .chip-election{background:#e8f0f8;color:#1a4a7a;}
 .chip-other{background:var(--surface2);color:var(--muted);}
+.mime-tag{display:inline-block;font-size:.6rem;font-family:var(--mono);background:var(--surface2);color:var(--muted);padding:0 4px;border-radius:2px;margin-left:4px;vertical-align:middle;}
 
 /* ── Detail panel (shared) ── */
 .detail-inner{padding:4px 12px 14px 28px;background:var(--surface);border-bottom:2px solid var(--accent);}
@@ -222,6 +223,18 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:
     <button class="btn" data-year="2025">2025</button>
     <button class="btn" data-year="2026">2026</button>
   </div>
+  <div class="ctrl-row">
+    <span class="fl">形式</span>
+    <button class="btn active" data-mime="all">すべて</button>
+    <button class="btn" data-mime="html">HTML</button>
+    <button class="btn" data-mime="pdf">PDF</button>
+    <button class="btn" data-mime="jpg">JPEG</button>
+    <button class="btn" data-mime="png">PNG</button>
+    <button class="btn" data-mime="gif">GIF</button>
+    <button class="btn" data-mime="css">CSS</button>
+    <button class="btn" data-mime="js">JS</button>
+    <button class="btn" data-mime="other">その他</button>
+  </div>
 </div>
 
 <!-- Desktop table -->
@@ -255,9 +268,17 @@ const CAT_LABEL = {top:'トップ',news:'ニュース',policy:'政策',election:
 const CAT_CHIP  = {top:'chip-top',news:'chip-news',policy:'chip-policy',election:'chip-election',other:'chip-other'};
 const SRC_LABEL = {wayback:'Wayback',commoncrawl:'CC','archive.today':'archive.today'};
 const SRC_CLS   = {wayback:'wb',commoncrawl:'cc','archive.today':'at'};
+const MIME_LABEL = {html:'HTML',pdf:'PDF',jpg:'JPEG',png:'PNG',webp:'WebP',gif:'GIF',svg:'SVG',css:'CSS',js:'JS',json:'JSON',rss:'RSS',xml:'XML',font:'Font',img:'画像',other:'その他'};
 
 let allPages=[], filtered=[], openPath=null;
-let catFilter='all', srcFilter='all', yearFilter='all';
+let catFilter='all', srcFilter='all', yearFilter='all', mimeFilter='all';
+
+// detail cache: bkt -> {url: changes[]}
+const detailCache = {};
+function loadDetail(bkt) {
+  if (detailCache[bkt]) return Promise.resolve(detailCache[bkt]);
+  return fetch(`detail/${bkt}.json`).then(r=>r.json()).then(d=>{detailCache[bkt]=d;return d;});
+}
 
 // sticky offset
 function updateCtrlHeight() {
@@ -265,7 +286,7 @@ function updateCtrlHeight() {
   document.documentElement.style.setProperty('--ctrl-h', h+'px');
 }
 
-fetch('data.json').then(r=>r.json()).then(data=>{
+fetch('data_summary.json').then(r=>r.json()).then(data=>{
   allPages=data;
   initMeta(); initOverview(); applyFilter();
   updateCtrlHeight();
@@ -280,13 +301,9 @@ function initMeta() {
 }
 
 function initOverview() {
+  // summaryにchangesがないため年別カウントはskip（barは空）
   const by = {};
   YEARS.forEach(y=>by[y]={wb:0,cc:0,at:0,total:0});
-  allPages.forEach(p=>p.changes.forEach(c=>{
-    const y=c.y; if(!by[y]) return;
-    const s=SRC_CLS[c.source]||'wb';
-    by[y][s]++; by[y].total++;
-  }));
   const max=Math.max(...YEARS.map(y=>by[y].total),1);
   document.getElementById('year-bars').innerHTML = YEARS.map(y=>{
     const d=by[y];
@@ -315,7 +332,7 @@ function clickYearBar(y) {
 }
 
 function filteredChanges(p) {
-  let chs = p.changes;
+  let chs = p.changes || [];
   if (srcFilter!=='all') chs = chs.filter(c=>c.source===srcFilter);
   if (yearFilter!=='all') chs = chs.filter(c=>c.y===yearFilter);
   return chs;
@@ -325,12 +342,11 @@ function applyFilter() {
   const q=document.getElementById('search').value.trim().toLowerCase();
   filtered = allPages.filter(p=>{
     if (catFilter!=='all' && p.cat!==catFilter) return false;
+    if (mimeFilter!=='all' && p.mime!==mimeFilter) return false;
     if (q && !p.url.toLowerCase().includes(q) && !p.path.toLowerCase().includes(q)) return false;
-    const chs=filteredChanges(p);
-    return chs.length>0;
+    return true;
   });
-  const total=filtered.reduce((s,p)=>s+filteredChanges(p).length,0);
-  document.getElementById('c-info').textContent = filtered.length+'URL / '+total+'件';
+  document.getElementById('c-info').textContent = filtered.length+'URL';
   renderTable(); renderCards();
 }
 
@@ -377,6 +393,23 @@ function detailHtml(p) {
   </div>`;
 }
 
+function rowHtmlFor(p, chs) {
+  const chipCls=CAT_CHIP[p.cat]||'chip-other';
+  const label=CAT_LABEL[p.cat]||p.cat;
+  const mimeTag = p.mime ? `<span class="mime-tag">${p.mime}</span>` : '';
+  return `<tr class="url-row${openPath===p.url?' open':''}" onclick="toggleRow('${p.url.replace(/'/g,"\\'")}')">
+    <td class="td-path" title="${p.url}">${p.path}${mimeTag}</td>
+    <td class="td-host">${p.host}</td>
+    <td><span class="chip ${chipCls}">${label}</span></td>
+    <td><div class="src-dots">${chs.length?srcDots(chs):''}</div></td>
+    <td class="td-num r">${p.count}</td>
+    <td><div class="spark">${chs.length?sparkHtml(chs):''}</div></td>
+    <td class="td-date">${p.first||''}</td>
+    <td class="td-date">${p.last||''}</td>
+    <td><a href="${p.url}" target="_blank" rel="noopener" class="btn-live" onclick="event.stopPropagation()">現在</a></td>
+  </tr>`;
+}
+
 function renderTable() {
   const tbody=document.getElementById('tbody');
   const empty=document.getElementById('empty');
@@ -384,22 +417,9 @@ function renderTable() {
   empty.hidden=true;
   tbody.innerHTML=filtered.map(p=>{
     const chs=filteredChanges(p);
-    const chipCls=CAT_CHIP[p.cat]||'chip-other';
-    const label=CAT_LABEL[p.cat]||p.cat;
-    const isOpen=openPath===p.url;
-    const rowHtml=`<tr class="url-row${isOpen?' open':''}" onclick="toggleRow('${p.url.replace(/'/g,"\\'")}')">
-      <td class="td-path" title="${p.url}">${p.path}</td>
-      <td class="td-host">${p.host}</td>
-      <td><span class="chip ${chipCls}">${label}</span></td>
-      <td><div class="src-dots">${srcDots(chs)}</div></td>
-      <td class="td-num r">${chs.length}</td>
-      <td><div class="spark">${sparkHtml(chs)}</div></td>
-      <td class="td-date">${chs[0]?.d||''}</td>
-      <td class="td-date">${chs[chs.length-1]?.d||''}</td>
-      <td><a href="${p.url}" target="_blank" rel="noopener" class="btn-live" onclick="event.stopPropagation()">現在</a></td>
-    </tr>`;
-    if(!isOpen) return rowHtml;
-    return rowHtml+`<tr class="detail-row"><td colspan="9">${detailHtml(p)}</td></tr>`;
+    const row=rowHtmlFor(p,chs);
+    if(openPath!==p.url) return row;
+    return row+`<tr class="detail-row"><td colspan="9">${detailHtml(p)}</td></tr>`;
   }).join('');
 }
 
@@ -417,11 +437,11 @@ function renderCards() {
       <div class="card-top">
         <span class="chip ${chipCls}">${label}</span>
         <span class="card-path">${p.path}</span>
-        <span style="font-size:.7rem;color:var(--muted);font-family:var(--mono);white-space:nowrap">${chs.length}件</span>
+        <span style="font-size:.7rem;color:var(--muted);font-family:var(--mono);white-space:nowrap">${p.count}件</span>
       </div>
       <div class="card-meta">
-        <span>${chs[0]?.d||''}</span><span>〜</span><span>${chs[chs.length-1]?.d||''}</span>
-        <div class="src-dots">${srcDots(chs)}</div>
+        <span>${p.first||''}</span><span>〜</span><span>${p.last||''}</span>
+        ${p.mime?`<span class="mime-tag">${p.mime}</span>`:''}
       </div>
     </div>`;
     if(!isOpen) return cardHtml;
@@ -430,12 +450,19 @@ function renderCards() {
 }
 
 function toggleRow(url) {
-  openPath=(openPath===url)?null:url;
-  renderTable(); renderCards();
-  if(openPath){
+  if(openPath===url){openPath=null;renderTable();renderCards();return;}
+  openPath=url;
+  const p=allPages.find(x=>x.url===url);
+  if(!p){return;}
+  if(p.changes){renderTable();renderCards();return;}
+  // detail をまだ持っていない場合はfetch
+  loadDetail(p.bkt).then(d=>{
+    p.changes=d[url]||[];
+    renderTable();renderCards();
     const el=document.querySelector('.url-row.open, .card.open');
     if(el) setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
-  }
+  });
+  renderTable();renderCards(); // ローディング状態で先に再描画
 }
 
 // filters
@@ -449,6 +476,12 @@ document.querySelectorAll('[data-src]').forEach(btn=>{
   btn.addEventListener('click',()=>{
     document.querySelectorAll('[data-src]').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active'); srcFilter=btn.dataset.src; openPath=null; applyFilter();
+  });
+});
+document.querySelectorAll('[data-mime]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('[data-mime]').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active'); mimeFilter=btn.dataset.mime; openPath=null; applyFilter();
   });
 });
 document.querySelectorAll('[data-year]').forEach(btn=>{
