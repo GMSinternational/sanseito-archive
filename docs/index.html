@@ -213,6 +213,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:
     <button class="btn" data-src="wayback">Wayback</button>
     <button class="btn" data-src="commoncrawl">CC</button>
     <button class="btn" data-src="archive.today">archive.today</button>
+    <span style="font-size:.62rem;color:var(--muted);margin-left:4px;">※展開時のみ反映</span>
     <span style="margin-left:8px;font-size:.68rem;color:var(--muted);">年</span>
     <button class="btn active" data-year="all">全年</button>
     <button class="btn" data-year="2020">2020</button>
@@ -307,21 +308,21 @@ function initMeta() {
 }
 
 function initOverview() {
-  // summaryにchangesがないため年別カウントはskip（barは空）
+  // summaryのfirst年でURLカウント（URLが初めてアーカイブされた年）
   const by = {};
-  YEARS.forEach(y=>by[y]={wb:0,cc:0,at:0,total:0});
-  const max=Math.max(...YEARS.map(y=>by[y].total),1);
+  YEARS.forEach(y=>by[y]=0);
+  allPages.forEach(p=>{ const y=p.first?p.first.slice(0,4):''; if(by[y]!==undefined) by[y]++; });
+  const max=Math.max(...YEARS.map(y=>by[y]),1);
   document.getElementById('year-bars').innerHTML = YEARS.map(y=>{
-    const d=by[y];
-    const barsHtml = d.total>0
-      ? ['wb','cc','at'].filter(s=>d[s]>0).map(s=>
-          `<div class="year-bar ${s}" style="height:${Math.max(Math.round(d[s]/max*32),2)}px" title="${s}:${d[s]}"></div>`
-        ).join('')
+    const n=by[y];
+    const h=Math.max(Math.round(n/max*32), n>0?2:0);
+    const barsHtml = n>0
+      ? `<div class="year-bar wb" style="height:${h}px" title="${y}:${n}URL"></div>`
       : `<div class="year-bar dim"></div>`;
     return `<div class="year-col" data-bar-year="${y}" onclick="clickYearBar('${y}')">
       <div class="year-bar-wrap">${barsHtml}</div>
       <div class="year-label">${y.slice(2)}</div>
-      <div class="year-count">${d.total||'-'}</div>
+      <div class="year-count">${n||'-'}</div>
     </div>`;
   }).join('');
 }
@@ -349,6 +350,12 @@ function applyFilter() {
   filtered = allPages.filter(p=>{
     if (catFilter!=='all' && p.cat!==catFilter) return false;
     if (mimeFilter!=='all' && p.mime!==mimeFilter) return false;
+    // 年フィルタ: firstとlastの範囲にyearFilterが含まれるURLのみ
+    if (yearFilter!=='all') {
+      const fy = p.first ? p.first.slice(0,4) : '';
+      const ly = p.last  ? p.last.slice(0,4)  : '';
+      if (!fy || fy > yearFilter || ly < yearFilter) return false;
+    }
     if (q && !p.url.toLowerCase().includes(q) && !p.path.toLowerCase().includes(q)) return false;
     return true;
   });
