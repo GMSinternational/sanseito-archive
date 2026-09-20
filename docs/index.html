@@ -261,6 +261,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:
 <!-- Mobile cards -->
 <div class="card-list" id="card-list"></div>
 <div class="empty" id="empty-m" hidden>該当なし</div>
+<div id="more-wrap" style="text-align:center;padding:12px 0;display:none;">
+  <button id="more-btn" class="btn" style="font-size:.85rem;padding:6px 20px;" onclick="loadMore()">さらに表示</button>
+  <span id="more-info" style="margin-left:10px;font-size:.72rem;color:var(--muted);"></span>
+</div>
 
 <script>
 const YEARS = ['2020','2021','2022','2023','2024','2025','2026'];
@@ -272,6 +276,8 @@ const MIME_LABEL = {html:'HTML',pdf:'PDF',jpg:'JPEG',png:'PNG',webp:'WebP',gif:'
 
 let allPages=[], filtered=[], openPath=null;
 let catFilter='all', srcFilter='all', yearFilter='all', mimeFilter='all';
+let pageOffset=0;
+const PAGE_SIZE=200;
 
 // detail cache: bkt -> {url: changes[]}
 const detailCache = {};
@@ -346,7 +352,23 @@ function applyFilter() {
     if (q && !p.url.toLowerCase().includes(q) && !p.path.toLowerCase().includes(q)) return false;
     return true;
   });
+  pageOffset=0;
   document.getElementById('c-info').textContent = filtered.length+'URL';
+  renderTable(); renderCards();
+}
+
+function updateMore() {
+  const wrap=document.getElementById('more-wrap');
+  const shown=Math.min(pageOffset+PAGE_SIZE, filtered.length);
+  if(shown < filtered.length){
+    wrap.style.display='block';
+    document.getElementById('more-info').textContent=shown+' / '+filtered.length+'件表示中';
+  } else {
+    wrap.style.display='none';
+  }
+}
+function loadMore() {
+  pageOffset+=PAGE_SIZE;
   renderTable(); renderCards();
 }
 
@@ -413,14 +435,16 @@ function rowHtmlFor(p, chs) {
 function renderTable() {
   const tbody=document.getElementById('tbody');
   const empty=document.getElementById('empty');
-  if(!filtered.length){tbody.innerHTML='';empty.hidden=false;return;}
+  if(!filtered.length){tbody.innerHTML='';empty.hidden=false;updateMore();return;}
   empty.hidden=true;
-  tbody.innerHTML=filtered.map(p=>{
+  const slice=filtered.slice(0, pageOffset+PAGE_SIZE);
+  tbody.innerHTML=slice.map(p=>{
     const chs=filteredChanges(p);
     const row=rowHtmlFor(p,chs);
     if(openPath!==p.url) return row;
     return row+`<tr class="detail-row"><td colspan="9">${detailHtml(p)}</td></tr>`;
   }).join('');
+  updateMore();
 }
 
 function renderCards() {
@@ -428,7 +452,8 @@ function renderCards() {
   const empty=document.getElementById('empty-m');
   if(!filtered.length){list.innerHTML='';empty.hidden=false;return;}
   empty.hidden=true;
-  list.innerHTML=filtered.map(p=>{
+  const slice=filtered.slice(0, pageOffset+PAGE_SIZE);
+  list.innerHTML=slice.map(p=>{
     const chs=filteredChanges(p);
     const chipCls=CAT_CHIP[p.cat]||'chip-other';
     const label=CAT_LABEL[p.cat]||p.cat;
