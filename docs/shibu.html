@@ -87,7 +87,8 @@ function hl(s){
 
 function entryHtml(d) {
   const isOpen = false;
-  const sentsHtml = d.sentences.map(s=>`<li>${hl(s)}</li>`).join('');
+  const sents = d.sentences || d.contexts || [];
+  const sentsHtml = sents.map(s=>`<li>${hl(s)}</li>`).join('');
   return `<div class="entry" id="e-${d.ts}">
     <div class="entry-head" onclick="toggle('${d.ts}')">
       <span class="entry-date">${d.date}</span>
