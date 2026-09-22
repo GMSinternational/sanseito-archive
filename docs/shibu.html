@@ -72,7 +72,7 @@ mark{background:var(--hit-bg);color:var(--hit);font-weight:700;border-radius:2px
 <div class="controls">
   <div class="ctrl-row">
     <span class="fl">パス</span>
-    <select id="seg-sel" style="font-size:.8rem;padding:3px 6px;border:1px solid var(--border);border-radius:3px;background:var(--surface2);color:var(--text);"></select>
+    <div id="seg-btns" style="display:flex;gap:5px;flex-wrap:wrap;"></div>
   </div>
   <div class="ctrl-row">
     <input class="search-box" type="text" id="search" placeholder="URL・本文で絞り込み…" autocomplete="off">
@@ -144,8 +144,13 @@ function loadMore(){pageOffset+=PAGE;render();}
 
 function applyFilter() {
   const q = document.getElementById('search').value.trim().toLowerCase();
+  const mainSegs = new Set(
+    Object.entries(allData.reduce((m,d)=>{const s=pathSeg(d.url);m[s]=(m[s]||0)+1;return m;},{}))
+    .filter(([,c])=>c>=5).map(([s])=>s)
+  );
   filtered = allData.filter(d=>{
-    if(segFilter!=='all' && pathSeg(d.url)!==segFilter) return false;
+    if(segFilter==='__other__' && mainSegs.has(pathSeg(d.url))) return false;
+    if(segFilter!=='all' && segFilter!=='__other__' && pathSeg(d.url)!==segFilter) return false;
     if(!q) return true;
     if(d.url.toLowerCase().includes(q)) return true;
     const sents = d.sentences || d.contexts || [];
@@ -161,15 +166,24 @@ function buildSegButtons(data) {
   const counts = {};
   data.forEach(d=>{ const s=pathSeg(d.url); counts[s]=(counts[s]||0)+1; });
   const segs = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
-  const sel = document.getElementById('seg-sel');
-  sel.innerHTML = `<option value="all">すべて (${data.length}件)</option>` +
-    segs.map(([seg,cnt])=>`<option value="${seg}">/${seg}/ (${cnt}件)</option>`).join('');
-  sel.addEventListener('change', ()=>{ segFilter=sel.value; applyFilter(); });
+  const main = segs.filter(([,c])=>c>=5);
+  const otherCount = segs.filter(([,c])=>c<5).reduce((s,[,c])=>s+c,0);
+  const wrap = document.getElementById('seg-btns');
+  const mk = (val, label) => {
+    const b = document.createElement('button');
+    b.className='btn'+(val==='all'?' active':'');
+    b.dataset.seg=val; b.textContent=label;
+    b.onclick=()=>setSeg(val);
+    wrap.appendChild(b);
+  };
+  mk('all', `すべて`);
+  main.forEach(([seg,cnt])=>mk(seg, `/${seg}/ ${cnt}`));
+  if(otherCount>0) mk('__other__', `その他 ${otherCount}`);
 }
 
 function setSeg(seg) {
   segFilter=seg;
-  document.getElementById('seg-sel').value=seg;
+  document.querySelectorAll('#seg-btns .btn').forEach(b=>b.classList.toggle('active',b.dataset.seg===seg));
   applyFilter();
 }
 
