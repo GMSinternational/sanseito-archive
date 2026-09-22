@@ -72,7 +72,7 @@ mark{background:var(--hit-bg);color:var(--hit);font-weight:700;border-radius:2px
 <div class="controls">
   <div class="ctrl-row">
     <span class="fl">パス</span>
-    <div id="seg-btns" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+    <select id="seg-sel" style="font-size:.8rem;padding:3px 6px;border:1px solid var(--border);border-radius:3px;background:var(--surface2);color:var(--text);"></select>
   </div>
   <div class="ctrl-row">
     <input class="search-box" type="text" id="search" placeholder="URL・本文で絞り込み…" autocomplete="off">
@@ -161,25 +161,15 @@ function buildSegButtons(data) {
   const counts = {};
   data.forEach(d=>{ const s=pathSeg(d.url); counts[s]=(counts[s]||0)+1; });
   const segs = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
-  const wrap = document.getElementById('seg-btns');
-  const allBtn = document.createElement('button');
-  allBtn.className='btn active'; allBtn.textContent='すべて'; allBtn.dataset.seg='all';
-  allBtn.onclick=()=>setSeg('all');
-  wrap.appendChild(allBtn);
-  segs.forEach(([seg, cnt])=>{
-    const btn = document.createElement('button');
-    btn.className='btn'; btn.dataset.seg=seg;
-    btn.textContent=`/${seg}/ (${cnt})`;
-    btn.onclick=()=>setSeg(seg);
-    wrap.appendChild(btn);
-  });
+  const sel = document.getElementById('seg-sel');
+  sel.innerHTML = `<option value="all">すべて (${data.length}件)</option>` +
+    segs.map(([seg,cnt])=>`<option value="${seg}">/${seg}/ (${cnt}件)</option>`).join('');
+  sel.addEventListener('change', ()=>{ segFilter=sel.value; applyFilter(); });
 }
 
 function setSeg(seg) {
   segFilter=seg;
-  document.querySelectorAll('#seg-btns .btn').forEach(b=>{
-    b.classList.toggle('active', b.dataset.seg===seg);
-  });
+  document.getElementById('seg-sel').value=seg;
   applyFilter();
 }
 
