@@ -245,31 +245,18 @@ function applyFilter() {
   render(filtered);
 }
 
-function mergeSents(sents) {
-  // 連続する短い断片（20字未満・句点なし）を一つの用例にまとめる
-  const out = [];
-  let buf = [];
-  for (const s of sents) {
-    const frag = s.length < 20 && !/[。！？]/.test(s);
-    if (frag) { buf.push(s); }
-    else { if (buf.length) { out.push(buf.join('・')); buf = []; } out.push(s); }
-  }
-  if (buf.length) out.push(buf.join('・'));
-  return out;
-}
-
 fetch('shibu_results.json').then(r => r.json()).then(data => {
   const map = {};
   data.forEach(d => {
-    const raw = (d.sentences || d.contexts || []).map(s => s.trim()).filter(Boolean);
-    const merged = mergeSents(raw);
-    merged.forEach(text => {
-      if (!map[text]) map[text] = { text, count: 0, first: d.date, last: d.date, paths: new Set(), wb: d.wb };
-      map[text].count++;
-      if (d.date < map[text].first) map[text].first = d.date;
-      if (d.date > map[text].last)  map[text].last  = d.date;
-      map[text].paths.add(urlPath(d.url));
-    });
+    const sents = (d.sentences || d.contexts || []).map(s => s.trim()).filter(Boolean);
+    if (!sents.length) return;
+    // スナップ内の全文を一つの用例にまとめる
+    const text = sents.join('　');
+    if (!map[text]) map[text] = { text, count: 0, first: d.date, last: d.date, paths: new Set(), wb: d.wb };
+    map[text].count++;
+    if (d.date < map[text].first) map[text].first = d.date;
+    if (d.date > map[text].last)  map[text].last  = d.date;
+    map[text].paths.add(urlPath(d.url));
   });
   items = Object.values(map).map(x => ({ ...x, paths: [...x.paths] }));
   document.getElementById('total-count').textContent = items.length + ' 用例';
