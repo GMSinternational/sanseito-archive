@@ -152,6 +152,9 @@ mark { background: var(--hl-bg); color: var(--hl-text); font-weight: 700; border
 .wb-link { font-size: .68rem; color: var(--accent); text-decoration: none; }
 .wb-link:hover { text-decoration: underline; }
 
+.path-main { font-family: var(--mono); font-size: .88rem; color: var(--accent); }
+.sent-list { list-style: none; padding: 6px 0 2px; display: flex; flex-direction: column; gap: 6px; }
+.sent-list li { font-size: .9rem; line-height: 1.75; padding-left: 10px; border-left: 2px solid var(--border); word-break: break-all; }
 .empty { text-align: center; padding: 60px 20px; color: var(--muted); font-size: .9rem; }
 .loading { text-align: center; padding: 60px 20px; color: var(--muted); }
 </style>
@@ -188,42 +191,38 @@ function hl(s) {
   return s.replace(/支部/g, '<mark>支部</mark>');
 }
 
-function pathSeg(url) {
+function urlPath(url) {
   try {
-    const m = url.match(/https?:\/\/[^/]+(\/[^/?#]*)/);
-    return m ? m[1].replace(/\/$/, '').split('/')[1] || '/' : '?';
-  } catch(e) { return '?'; }
+    const m = url.match(/https?:\/\/[^/]+(\/[^?#]*)/);
+    return m ? m[1].replace(/\/$/, '') || '/' : url;
+  } catch(e) { return url; }
 }
 
 function render(filtered) {
   const list = document.getElementById('list');
-  document.getElementById('result-count').textContent = filtered.length + ' 件';
+  document.getElementById('result-count').textContent = filtered.length + ' ページ';
   if (!filtered.length) {
-    list.innerHTML = '<div class="empty">該当する用例がありません</div>';
+    list.innerHTML = '<div class="empty">該当するページがありません</div>';
     return;
   }
   list.innerHTML = filtered.map((item, i) => {
-    const many = item.count >= 5;
-    const paths = [...new Set(item.urls.map(u => {
-      const seg = pathSeg(u.url);
-      return '/' + seg;
-    }))].slice(0, 8);
-    const wbSample = item.urls[0];
+    const many = item.snaps >= 3;
+    const sentsHtml = item.sents.map(s => `<li>${hl(s)}</li>`).join('');
     return `<div class="row" id="row${i}">
       <div class="row-head" tabindex="0" role="button" aria-expanded="false"
            onclick="toggle(${i})" onkeydown="if(event.key==='Enter'||event.key===' ')toggle(${i})">
-        <span class="cnt${many?' many':''}">${item.count}</span>
-        <span class="sent">${hl(item.text)}</span>
+        <span class="cnt${many?' many':''}">${item.snaps}</span>
+        <span class="sent path-main">${item.path}</span>
         <span class="toggle-icon">▶</span>
       </div>
       <div class="row-detail">
         <div class="meta-line">
           <span>初出 <b>${item.first}</b></span>
           <span>最終 <b>${item.last}</b></span>
-          <span>スナップ <b>${item.count}</b> 件</span>
-          ${wbSample ? `<a class="wb-link" href="${wbSample.wb}" target="_blank" rel="noopener">アーカイブで見る →</a>` : ''}
+          <span>スナップ <b>${item.snaps}</b> 件</span>
+          <a class="wb-link" href="${item.wb}" target="_blank" rel="noopener">アーカイブで見る →</a>
         </div>
-        <div class="paths">${paths.map(p=>`<span class="path-tag">${p}</span>`).join('')}</div>
+        <ul class="sent-list">${sentsHtml}</ul>
       </div>
     </div>`;
   }).join('');
@@ -239,9 +238,11 @@ function toggle(i) {
 function applyFilter() {
   const q = document.getElementById('q').value.trim().toLowerCase();
   const sort = document.getElementById('sort').value;
-  let filtered = q ? items.filter(x => x.text.toLowerCase().includes(q)) : items.slice();
+  let filtered = q
+    ? items.filter(x => x.path.toLowerCase().includes(q) || x.sents.some(s => s.toLowerCase().includes(q)))
+    : items.slice();
   filtered.sort((a, b) => {
-    if (sort === 'count') return b.count - a.count;
+    if (sort === 'count') return b.snaps - a.snaps;
     if (sort === 'first') return (a.first||'').localeCompare(b.first||'');
     if (sort === 'last')  return (b.last||'').localeCompare(a.last||'');
     return 0;
@@ -250,21 +251,18 @@ function applyFilter() {
 }
 
 fetch('shibu_results.json').then(r => r.json()).then(data => {
+  // URL単位でグループ化
   const map = {};
   data.forEach(d => {
-    const sents = d.sentences || d.contexts || [];
-    sents.forEach(s => {
-      const t = s.trim();
-      if (!t) return;
-      if (!map[t]) map[t] = { text: t, count: 0, first: d.date, last: d.date, urls: [] };
-      map[t].count++;
-      if (d.date < map[t].first) map[t].first = d.date;
-      if (d.date > map[t].last)  map[t].last  = d.date;
-      map[t].urls.push({ date: d.date, url: d.url, wb: d.wb });
-    });
+    const url = d.url;
+    if (!map[url]) map[url] = { url, path: urlPath(url), first: d.date, last: d.date, snaps: 0, sents: new Set(), wb: d.wb };
+    map[url].snaps++;
+    if (d.date < map[url].first) map[url].first = d.date;
+    if (d.date > map[url].last)  map[url].last  = d.date;
+    (d.sentences || d.contexts || []).forEach(s => { const t = s.trim(); if (t) map[url].sents.add(t); });
   });
-  items = Object.values(map).sort((a, b) => b.count - a.count);
-  document.getElementById('total-count').textContent = items.length;
+  items = Object.values(map).map(x => ({ ...x, sents: [...x.sents] }));
+  document.getElementById('total-count').textContent = items.length + ' ページ';
   applyFilter();
 });
 
