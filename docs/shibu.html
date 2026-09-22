@@ -149,8 +149,7 @@ function applyFilter() {
     .filter(([,c])=>c>=5).map(([s])=>s)
   );
   filtered = allData.filter(d=>{
-    if(segFilter==='__other__' && mainSegs.has(pathSeg(d.url))) return false;
-    if(segFilter!=='all' && segFilter!=='__other__' && pathSeg(d.url)!==segFilter) return false;
+    if(segFilter!=='all' && pathSeg(d.url)!==segFilter) return false;
     if(!q) return true;
     if(d.url.toLowerCase().includes(q)) return true;
     const sents = d.sentences || d.contexts || [];
@@ -178,12 +177,26 @@ function buildSegButtons(data) {
   };
   mk('all', `すべて`);
   main.forEach(([seg,cnt])=>mk(seg, `/${seg}/ ${cnt}`));
-  if(otherCount>0) mk('__other__', `その他 ${otherCount}`);
+  if(otherCount>0) {
+    const sel = document.createElement('select');
+    sel.id='seg-other-sel';
+    sel.style.cssText='font-size:.75rem;padding:3px 6px;border:1px solid var(--border);border-radius:3px;background:var(--surface2);color:var(--text);cursor:pointer;';
+    const others = segs.filter(([,c])=>c<5);
+    sel.innerHTML=`<option value="">その他 (${otherCount}件)</option>`+
+      others.map(([seg,cnt])=>`<option value="${seg}">/${seg}/ ${cnt}件</option>`).join('');
+    sel.addEventListener('change',()=>{
+      if(sel.value) setSeg(sel.value);
+    });
+    wrap.appendChild(sel);
+  }
 }
 
 function setSeg(seg) {
   segFilter=seg;
   document.querySelectorAll('#seg-btns .btn').forEach(b=>b.classList.toggle('active',b.dataset.seg===seg));
+  // その他プルダウン: ボタン選択時はリセット、プルダウン選択時はそのまま
+  const sel=document.getElementById('seg-other-sel');
+  if(sel && !document.querySelector(`#seg-other-sel option[value="${seg}"]`)) sel.value='';
   applyFilter();
 }
 
