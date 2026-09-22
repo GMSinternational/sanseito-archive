@@ -152,9 +152,6 @@ mark { background: var(--hl-bg); color: var(--hl-text); font-weight: 700; border
 .wb-link { font-size: .68rem; color: var(--accent); text-decoration: none; }
 .wb-link:hover { text-decoration: underline; }
 
-.path-main { font-family: var(--mono); font-size: .88rem; color: var(--accent); }
-.sent-list { list-style: none; padding: 6px 0 2px; display: flex; flex-direction: column; gap: 6px; }
-.sent-list li { font-size: .9rem; line-height: 1.75; padding-left: 10px; border-left: 2px solid var(--border); word-break: break-all; }
 .empty { text-align: center; padding: 60px 20px; color: var(--muted); font-size: .9rem; }
 .loading { text-align: center; padding: 60px 20px; color: var(--muted); }
 </style>
@@ -164,7 +161,7 @@ mark { background: var(--hl-bg); color: var(--hl-text); font-weight: 700; border
 <div class="hd">
   <div class="hd-inner">
     <h1>支部 用例データベース</h1>
-    <span class="hd-sub">参政党アーカイブ (〜2021-09-20) — <b id="total-count">…</b> 用例</span>
+    <span class="hd-sub">参政党アーカイブ (〜2021-09-20) — <b id="total-count">…</b></span>
   </div>
 </div>
 
@@ -200,29 +197,29 @@ function urlPath(url) {
 
 function render(filtered) {
   const list = document.getElementById('list');
-  document.getElementById('result-count').textContent = filtered.length + ' ページ';
+  document.getElementById('result-count').textContent = filtered.length + ' 用例';
   if (!filtered.length) {
-    list.innerHTML = '<div class="empty">該当するページがありません</div>';
+    list.innerHTML = '<div class="empty">該当する用例がありません</div>';
     return;
   }
   list.innerHTML = filtered.map((item, i) => {
-    const many = item.snaps >= 3;
-    const sentsHtml = item.sents.map(s => `<li>${hl(s)}</li>`).join('');
+    const many = item.count >= 5;
+    const pathsHtml = item.paths.map(p => `<span class="path-tag">${p}</span>`).join('');
     return `<div class="row" id="row${i}">
       <div class="row-head" tabindex="0" role="button" aria-expanded="false"
            onclick="toggle(${i})" onkeydown="if(event.key==='Enter'||event.key===' ')toggle(${i})">
-        <span class="cnt${many?' many':''}">${item.snaps}</span>
-        <span class="sent path-main">${item.path}</span>
+        <span class="cnt${many?' many':''}">${item.count}</span>
+        <span class="sent">${hl(item.text)}</span>
         <span class="toggle-icon">▶</span>
       </div>
       <div class="row-detail">
         <div class="meta-line">
           <span>初出 <b>${item.first}</b></span>
           <span>最終 <b>${item.last}</b></span>
-          <span>スナップ <b>${item.snaps}</b> 件</span>
+          <span>出現 <b>${item.count}</b> 件</span>
           <a class="wb-link" href="${item.wb}" target="_blank" rel="noopener">アーカイブで見る →</a>
         </div>
-        <ul class="sent-list">${sentsHtml}</ul>
+        <div class="paths">${pathsHtml}</div>
       </div>
     </div>`;
   }).join('');
@@ -238,11 +235,9 @@ function toggle(i) {
 function applyFilter() {
   const q = document.getElementById('q').value.trim().toLowerCase();
   const sort = document.getElementById('sort').value;
-  let filtered = q
-    ? items.filter(x => x.path.toLowerCase().includes(q) || x.sents.some(s => s.toLowerCase().includes(q)))
-    : items.slice();
+  let filtered = q ? items.filter(x => x.text.toLowerCase().includes(q)) : items.slice();
   filtered.sort((a, b) => {
-    if (sort === 'count') return b.snaps - a.snaps;
+    if (sort === 'count') return b.count - a.count;
     if (sort === 'first') return (a.first||'').localeCompare(b.first||'');
     if (sort === 'last')  return (b.last||'').localeCompare(a.last||'');
     return 0;
@@ -250,19 +245,34 @@ function applyFilter() {
   render(filtered);
 }
 
+function mergeSents(sents) {
+  // 連続する短い断片（20字未満・句点なし）を一つの用例にまとめる
+  const out = [];
+  let buf = [];
+  for (const s of sents) {
+    const frag = s.length < 20 && !/[。！？]/.test(s);
+    if (frag) { buf.push(s); }
+    else { if (buf.length) { out.push(buf.join('・')); buf = []; } out.push(s); }
+  }
+  if (buf.length) out.push(buf.join('・'));
+  return out;
+}
+
 fetch('shibu_results.json').then(r => r.json()).then(data => {
-  // URL単位でグループ化
   const map = {};
   data.forEach(d => {
-    const url = d.url;
-    if (!map[url]) map[url] = { url, path: urlPath(url), first: d.date, last: d.date, snaps: 0, sents: new Set(), wb: d.wb };
-    map[url].snaps++;
-    if (d.date < map[url].first) map[url].first = d.date;
-    if (d.date > map[url].last)  map[url].last  = d.date;
-    (d.sentences || d.contexts || []).forEach(s => { const t = s.trim(); if (t) map[url].sents.add(t); });
+    const raw = (d.sentences || d.contexts || []).map(s => s.trim()).filter(Boolean);
+    const merged = mergeSents(raw);
+    merged.forEach(text => {
+      if (!map[text]) map[text] = { text, count: 0, first: d.date, last: d.date, paths: new Set(), wb: d.wb };
+      map[text].count++;
+      if (d.date < map[text].first) map[text].first = d.date;
+      if (d.date > map[text].last)  map[text].last  = d.date;
+      map[text].paths.add(urlPath(d.url));
+    });
   });
-  items = Object.values(map).map(x => ({ ...x, sents: [...x.sents] }));
-  document.getElementById('total-count').textContent = items.length + ' ページ';
+  items = Object.values(map).map(x => ({ ...x, paths: [...x.paths] }));
+  document.getElementById('total-count').textContent = items.length + ' 用例';
   applyFilter();
 });
 
