@@ -37,8 +37,13 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:
 .hd-sub{font-size:.78rem;color:var(--muted);}
 .hd a{font-size:.78rem;color:var(--accent);text-decoration:none;margin-left:auto;}
 .hd a:hover{text-decoration:underline;}
-.controls{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 20px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:10;}
-.search-box{font-size:.82rem;padding:4px 8px;border:1px solid var(--border);border-radius:3px;background:var(--surface2);color:var(--text);width:220px;}
+.controls{background:var(--surface);border-bottom:1px solid var(--border);padding:7px 16px;position:sticky;top:0;z-index:10;}
+.ctrl-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:3px 0;}
+.fl{font-size:.68rem;color:var(--muted);white-space:nowrap;min-width:2.5em;}
+.btn{font-size:.75rem;padding:3px 10px;background:var(--surface);border:1px solid var(--border);border-radius:3px;color:var(--text);cursor:pointer;white-space:nowrap;}
+.btn:hover{background:var(--accent-light);border-color:var(--accent);color:var(--accent);}
+.btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.search-box{font-size:.82rem;padding:4px 8px;border:1px solid var(--border);border-radius:3px;background:var(--surface2);color:var(--text);width:200px;}
 .c-info{font-size:.72rem;color:var(--muted);font-family:var(--mono);}
 .list{max-width:900px;margin:0 auto;padding:12px 16px;}
 .entry{background:var(--surface);border:1px solid var(--border);border-radius:4px;margin-bottom:10px;overflow:hidden;}
@@ -56,8 +61,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:
 mark{background:var(--hit-bg);color:var(--hit);font-weight:700;border-radius:2px;padding:0 1px;}
 .empty{text-align:center;padding:40px;color:var(--muted);font-size:.88rem;}
 .more-wrap{text-align:center;padding:12px 0;}
-.btn{font-size:.8rem;padding:5px 16px;background:var(--surface);border:1px solid var(--border);border-radius:3px;color:var(--text);cursor:pointer;}
-.btn:hover{background:var(--accent-light);border-color:var(--accent);color:var(--accent);}
 </style>
 </head>
 <body>
@@ -67,8 +70,14 @@ mark{background:var(--hit-bg);color:var(--hit);font-weight:700;border-radius:2px
   <a href="index.html">← 変化ログへ</a>
 </div>
 <div class="controls">
-  <input class="search-box" type="text" id="search" placeholder="URL・本文で絞り込み…" autocomplete="off">
-  <span class="c-info" id="c-info"></span>
+  <div class="ctrl-row">
+    <span class="fl">パス</span>
+    <div id="seg-btns" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+  </div>
+  <div class="ctrl-row">
+    <input class="search-box" type="text" id="search" placeholder="URL・本文で絞り込み…" autocomplete="off">
+    <span class="c-info" id="c-info"></span>
+  </div>
 </div>
 <div class="list" id="list"></div>
 <div class="empty" id="empty" hidden>該当なし</div>
@@ -78,15 +87,19 @@ mark{background:var(--hit-bg);color:var(--hit);font-weight:700;border-radius:2px
 </div>
 
 <script>
-let allData=[], filtered=[], pageOffset=0;
+let allData=[], filtered=[], pageOffset=0, segFilter='all';
 const PAGE=50;
 
-function hl(s){
+function pathSeg(url) {
+  const m = url.match(/https?:\/\/[^/]+\/([^/?#]*)/);
+  return m ? (m[1] || '(top)') : '(top)';
+}
+
+function hl(s) {
   return s.replace(/支部/g,'<mark>支部</mark>');
 }
 
 function entryHtml(d) {
-  const isOpen = false;
   const sents = d.sentences || d.contexts || [];
   const sentsHtml = sents.map(s=>`<li>${hl(s)}</li>`).join('');
   return `<div class="entry" id="e-${d.ts}">
@@ -112,8 +125,7 @@ function render() {
   const empty = document.getElementById('empty');
   if(!filtered.length){list.innerHTML='';empty.hidden=false;updateMore();return;}
   empty.hidden=true;
-  const slice = filtered.slice(0, pageOffset+PAGE);
-  list.innerHTML = slice.map(entryHtml).join('');
+  list.innerHTML = filtered.slice(0, pageOffset+PAGE).map(entryHtml).join('');
   updateMore();
 }
 
@@ -130,12 +142,14 @@ function updateMore() {
 
 function loadMore(){pageOffset+=PAGE;render();}
 
-function applyFilter(){
+function applyFilter() {
   const q = document.getElementById('search').value.trim().toLowerCase();
   filtered = allData.filter(d=>{
+    if(segFilter!=='all' && pathSeg(d.url)!==segFilter) return false;
     if(!q) return true;
     if(d.url.toLowerCase().includes(q)) return true;
-    if(d.sentences.some(s=>s.toLowerCase().includes(q))) return true;
+    const sents = d.sentences || d.contexts || [];
+    if(sents.some(s=>s.toLowerCase().includes(q))) return true;
     return false;
   });
   pageOffset=0;
@@ -143,10 +157,36 @@ function applyFilter(){
   render();
 }
 
+function buildSegButtons(data) {
+  const counts = {};
+  data.forEach(d=>{ const s=pathSeg(d.url); counts[s]=(counts[s]||0)+1; });
+  const segs = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  const wrap = document.getElementById('seg-btns');
+  const allBtn = document.createElement('button');
+  allBtn.className='btn active'; allBtn.textContent='すべて'; allBtn.dataset.seg='all';
+  allBtn.onclick=()=>setSeg('all');
+  wrap.appendChild(allBtn);
+  segs.forEach(([seg, cnt])=>{
+    const btn = document.createElement('button');
+    btn.className='btn'; btn.dataset.seg=seg;
+    btn.textContent=`/${seg}/ (${cnt})`;
+    btn.onclick=()=>setSeg(seg);
+    wrap.appendChild(btn);
+  });
+}
+
+function setSeg(seg) {
+  segFilter=seg;
+  document.querySelectorAll('#seg-btns .btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.seg===seg);
+  });
+  applyFilter();
+}
+
 fetch('shibu_results.json').then(r=>r.json()).then(data=>{
-  allData = data;
-  filtered = data;
-  document.getElementById('c-info').textContent = data.length+'件';
+  allData=data; filtered=data;
+  document.getElementById('c-info').textContent=data.length+'件';
+  buildSegButtons(data);
   render();
 });
 
