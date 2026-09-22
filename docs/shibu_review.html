@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>支部 用例レビュー</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@700&family=Noto+Sans+JP:wght@400;500&display=swap">
+<style>
+:root {
+  --bg:#f2efe8; --surface:#fafaf7; --surface2:#f0ede6;
+  --border:#d8d3ca; --text:#1c1a17; --muted:#6a6560;
+  --accent:#1a3f7a; --accent-light:#e4eaf5;
+  --keep:#1e6e2e; --keep-bg:#e4f0e4;
+  --drop:#7a1a1a; --drop-bg:#f8ece8;
+  --sans:'Noto Sans JP',system-ui,sans-serif;
+  --serif:'Noto Serif JP',serif;
+  --mono:'SFMono-Regular','Consolas',monospace;
+}
+@media(prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#111009;--surface:#1a1816;--surface2:#141210;
+    --border:#2a2822;--text:#e2ddd4;--muted:#857f78;
+    --accent:#6090d8;--accent-light:#162038;
+    --keep:#50b870;--keep-bg:#102810;
+    --drop:#e07060;--drop-bg:#2a1010;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:14px;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.6;min-height:100vh;}
+
+/* header */
+.hd{background:var(--surface);border-bottom:2px solid var(--accent);padding:10px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.hd h1{font-family:var(--serif);font-size:1.1rem;font-weight:700;}
+.stat{font-size:.72rem;font-family:var(--mono);color:var(--muted);}
+.stat b{color:var(--text);}
+.export-btn{margin-left:auto;font-size:.78rem;padding:4px 14px;background:var(--accent);color:#fff;border:none;border-radius:3px;cursor:pointer;}
+.export-btn:hover{opacity:.85;}
+
+/* progress bar */
+.prog-wrap{background:var(--surface2);height:4px;}
+.prog-bar{height:4px;background:var(--accent);transition:width .2s;}
+
+/* filter tabs */
+.tabs{background:var(--surface);border-bottom:1px solid var(--border);padding:6px 20px;display:flex;gap:6px;align-items:center;}
+.tab{font-size:.78rem;padding:3px 12px;border:1px solid var(--border);border-radius:3px;background:transparent;color:var(--muted);cursor:pointer;}
+.tab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.tab-count{font-family:var(--mono);}
+.jump-wrap{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--muted);}
+.jump-wrap input{width:54px;font-size:.78rem;padding:2px 6px;border:1px solid var(--border);border-radius:3px;background:var(--surface2);color:var(--text);text-align:center;}
+
+/* main card */
+.main{max-width:760px;margin:24px auto;padding:0 16px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+.card-idx{font-size:.68rem;color:var(--muted);font-family:var(--mono);padding:8px 16px 0;}
+.card-sent{font-size:1rem;line-height:1.85;padding:14px 16px;border-bottom:1px solid var(--border-soft,var(--border));word-break:break-all;}
+mark{background:var(--drop-bg);color:var(--drop);font-weight:700;border-radius:2px;padding:0 1px;}
+.card-meta{padding:8px 16px;font-size:.72rem;color:var(--muted);display:flex;gap:16px;flex-wrap:wrap;}
+.card-meta span{display:flex;align-items:center;gap:4px;}
+.urls{padding:4px 16px 10px;font-size:.72rem;display:flex;flex-wrap:wrap;gap:4px;}
+.url-tag{background:var(--surface2);border:1px solid var(--border);border-radius:2px;padding:1px 6px;font-family:var(--mono);}
+.note-wrap{padding:6px 16px 10px;border-top:1px solid var(--border);}
+.note-box{width:100%;font-size:.8rem;padding:5px 8px;border:1px solid var(--border);border-radius:3px;background:var(--surface2);color:var(--text);resize:vertical;min-height:48px;font-family:var(--sans);}
+
+/* decision bar */
+.dec-bar{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:center;}
+.btn-drop{flex:1;padding:10px;font-size:.9rem;font-weight:500;background:var(--drop-bg);color:var(--drop);border:1px solid var(--drop);border-radius:4px;cursor:pointer;}
+.btn-drop:hover{background:var(--drop);color:#fff;}
+.btn-skip{padding:10px 18px;font-size:.82rem;background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:4px;cursor:pointer;}
+.btn-skip:hover{background:var(--border);}
+.btn-keep{flex:1;padding:10px;font-size:.9rem;font-weight:500;background:var(--keep-bg);color:var(--keep);border:1px solid var(--keep);border-radius:4px;cursor:pointer;}
+.btn-keep:hover{background:var(--keep);color:#fff;}
+
+/* nav */
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:12px;}
+.nav-btn{font-size:.8rem;padding:5px 16px;background:var(--surface);border:1px solid var(--border);border-radius:3px;color:var(--text);cursor:pointer;}
+.nav-btn:hover:not(:disabled){background:var(--accent-light);border-color:var(--accent);}
+.nav-btn:disabled{opacity:.35;cursor:default;}
+.nav-pos{font-size:.72rem;color:var(--muted);font-family:var(--mono);}
+
+/* badge */
+.badge{display:inline-block;font-size:.65rem;font-weight:700;padding:1px 7px;border-radius:10px;margin-left:6px;vertical-align:middle;}
+.badge-keep{background:var(--keep-bg);color:var(--keep);}
+.badge-drop{background:var(--drop-bg);color:var(--drop);}
+.badge-skip{background:var(--surface2);color:var(--muted);}
+
+.empty{text-align:center;padding:60px;color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="hd">
+  <h1>支部 用例レビュー</h1>
+  <span class="stat">採用 <b id="cnt-keep">0</b> / 除外 <b id="cnt-drop">0</b> / 未 <b id="cnt-pend">0</b> / 計 <b id="cnt-total">0</b></span>
+  <button class="export-btn" onclick="exportJSON()">採用分をJSON出力</button>
+</div>
+<div class="prog-wrap"><div class="prog-bar" id="prog"></div></div>
+<div class="tabs">
+  <button class="tab active" data-filter="all" onclick="setFilter('all')">すべて <span class="tab-count" id="tc-all"></span></button>
+  <button class="tab" data-filter="pend" onclick="setFilter('pend')">未レビュー <span class="tab-count" id="tc-pend"></span></button>
+  <button class="tab" data-filter="keep" onclick="setFilter('keep')">採用 <span class="tab-count" id="tc-keep"></span></button>
+  <button class="tab" data-filter="drop" onclick="setFilter('drop')">除外 <span class="tab-count" id="tc-drop"></span></button>
+  <div class="jump-wrap">
+    <span>移動</span>
+    <input type="number" id="jump-input" min="1" placeholder="番号">
+    <button class="nav-btn" onclick="jumpTo()">Go</button>
+  </div>
+</div>
+<div class="main" id="main"></div>
+
+<script>
+const STORAGE_KEY = 'shibu_review_v1';
+let items = [];      // [{text, count, first, last, urls: [{date,url,wb}]}]
+let decisions = {};  // text -> {dec:'keep'|'drop'|null, note:''}
+let filter = 'all';
+let filtIdx = 0;     // index in filteredItems
+
+function filteredItems() {
+  if(filter==='all')  return items;
+  if(filter==='pend') return items.filter(x=>!decisions[x.text]?.dec);
+  if(filter==='keep') return items.filter(x=>decisions[x.text]?.dec==='keep');
+  if(filter==='drop') return items.filter(x=>decisions[x.text]?.dec==='drop');
+  return items;
+}
+
+function saveDecisions() {
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(decisions)); }catch(e){}
+}
+function loadDecisions() {
+  try{ const d=localStorage.getItem(STORAGE_KEY); if(d) decisions=JSON.parse(d); }catch(e){}
+}
+
+function hl(s){ return s.replace(/支部/g,'<mark>支部</mark>'); }
+
+function render() {
+  const fi = filteredItems();
+  const main = document.getElementById('main');
+  if(!fi.length){ main.innerHTML='<div class="empty">該当なし</div>'; updateStats(); return; }
+  if(filtIdx>=fi.length) filtIdx=fi.length-1;
+  if(filtIdx<0) filtIdx=0;
+  const item = fi[filtIdx];
+  const dec = decisions[item.text]?.dec || null;
+  const note = decisions[item.text]?.note || '';
+  const badge = dec==='keep'?'<span class="badge badge-keep">採用済</span>'
+               :dec==='drop'?'<span class="badge badge-drop">除外済</span>':'';
+  const urlsHtml = [...new Set(item.urls.map(u=>{ const m=u.url.match(/https?:\/\/[^/]+(\/[^?#]*)/); return m?m[1]:u.url; }))]
+    .map(p=>`<span class="url-tag">${p}</span>`).join('');
+  main.innerHTML=`
+    <div class="card">
+      <div class="card-idx">${filtIdx+1} / ${fi.length}${badge}</div>
+      <div class="card-sent">${hl(item.text)}</div>
+      <div class="card-meta">
+        <span>出現 <b>${item.count}</b>回</span>
+        <span>最初 ${item.first}</span>
+        <span>最後 ${item.last}</span>
+      </div>
+      <div class="urls">${urlsHtml}</div>
+      <div class="note-wrap">
+        <textarea class="note-box" id="note-box" placeholder="メモ（任意）">${note}</textarea>
+      </div>
+      <div class="dec-bar">
+        <button class="btn-drop${dec==='drop'?' active':''}" onclick="decide('drop')">✕ 除外</button>
+        <button class="btn-skip" onclick="navigate(1)">→ スキップ</button>
+        <button class="btn-keep${dec==='keep'?' active':''}" onclick="decide('keep')">✓ 採用</button>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="nav-btn" onclick="navigate(-1)" ${filtIdx===0?'disabled':''}>← 前へ</button>
+      <span class="nav-pos">${filtIdx+1} / ${fi.length}</span>
+      <button class="nav-btn" onclick="navigate(1)" ${filtIdx===fi.length-1?'disabled':''}>次へ →</button>
+    </div>`;
+  updateStats();
+  document.getElementById('note-box').addEventListener('change', e=>{
+    if(!decisions[item.text]) decisions[item.text]={dec:null,note:''};
+    decisions[item.text].note=e.target.value;
+    saveDecisions();
+  });
+}
+
+function decide(dec) {
+  const fi=filteredItems();
+  const item=fi[filtIdx];
+  if(!decisions[item.text]) decisions[item.text]={dec:null,note:''};
+  decisions[item.text].dec = decisions[item.text].dec===dec ? null : dec;
+  decisions[item.text].note = document.getElementById('note-box')?.value||'';
+  saveDecisions();
+  // 未レビューモードなら次へ自動進む
+  if(filter==='pend' && decisions[item.text].dec) {
+    const next=filteredItems();
+    if(filtIdx>=next.length) filtIdx=Math.max(0,next.length-1);
+  }
+  render();
+}
+
+function navigate(d) {
+  const fi=filteredItems();
+  filtIdx=Math.max(0,Math.min(fi.length-1,filtIdx+d));
+  render();
+}
+
+function jumpTo() {
+  const v=parseInt(document.getElementById('jump-input').value);
+  if(!isNaN(v)) { filtIdx=Math.max(0,Math.min(filteredItems().length-1,v-1)); render(); }
+}
+
+function setFilter(f) {
+  filter=f; filtIdx=0;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.filter===f));
+  render();
+}
+
+function updateStats() {
+  const keep=items.filter(x=>decisions[x.text]?.dec==='keep').length;
+  const drop=items.filter(x=>decisions[x.text]?.dec==='drop').length;
+  const pend=items.length-keep-drop;
+  document.getElementById('cnt-keep').textContent=keep;
+  document.getElementById('cnt-drop').textContent=drop;
+  document.getElementById('cnt-pend').textContent=pend;
+  document.getElementById('cnt-total').textContent=items.length;
+  document.getElementById('tc-all').textContent=items.length;
+  document.getElementById('tc-pend').textContent=pend;
+  document.getElementById('tc-keep').textContent=keep;
+  document.getElementById('tc-drop').textContent=drop;
+  const done=keep+drop;
+  document.getElementById('prog').style.width=(items.length?done/items.length*100:0)+'%';
+}
+
+function exportJSON() {
+  const kept=items.filter(x=>decisions[x.text]?.dec==='keep').map(x=>({
+    text: x.text,
+    note: decisions[x.text]?.note||'',
+    count: x.count,
+    first: x.first,
+    last: x.last,
+    urls: x.urls
+  }));
+  const blob=new Blob([JSON.stringify(kept,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='shibu_adopted.json';
+  a.click();
+}
+
+// データ構築
+fetch('shibu_results.json').then(r=>r.json()).then(data=>{
+  loadDecisions();
+  const map={};
+  data.forEach(d=>{
+    const sents=d.sentences||d.contexts||[];
+    sents.forEach(s=>{
+      const t=s.trim();
+      if(!t) return;
+      if(!map[t]) map[t]={text:t,count:0,first:d.date,last:d.date,urls:[]};
+      map[t].count++;
+      if(d.date<map[t].first) map[t].first=d.date;
+      if(d.date>map[t].last)  map[t].last=d.date;
+      map[t].urls.push({date:d.date,url:d.url,wb:d.wb});
+    });
+  });
+  items=Object.values(map).sort((a,b)=>b.count-a.count);
+  render();
+});
+
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT') return;
+  if(e.key==='ArrowRight'||e.key==='l') navigate(1);
+  if(e.key==='ArrowLeft'||e.key==='h')  navigate(-1);
+  if(e.key==='k') decide('keep');
+  if(e.key==='x') decide('drop');
+});
+</script>
+</body>
+</html>
