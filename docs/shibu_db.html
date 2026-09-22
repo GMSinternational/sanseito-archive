@@ -248,15 +248,17 @@ function applyFilter() {
 fetch('shibu_results.json').then(r => r.json()).then(data => {
   const map = {};
   data.forEach(d => {
-    const sents = (d.sentences || d.contexts || []).map(s => s.trim()).filter(Boolean);
-    if (!sents.length) return;
-    // スナップ内の全文を一つの用例にまとめる
-    const text = sents.join('　');
-    if (!map[text]) map[text] = { text, count: 0, first: d.date, last: d.date, paths: new Set(), wb: d.wb };
-    map[text].count++;
-    if (d.date < map[text].first) map[text].first = d.date;
-    if (d.date > map[text].last)  map[text].last  = d.date;
-    map[text].paths.add(urlPath(d.url));
+    // groups: [[同一要素の文...], ...] — 要素単位で連続している文は一つの用例
+    const groups = d.groups || (d.sentences || d.contexts || []).map(s => [s]);
+    groups.forEach(grp => {
+      const text = grp.map(s => s.trim()).filter(Boolean).join('　');
+      if (!text) return;
+      if (!map[text]) map[text] = { text, count: 0, first: d.date, last: d.date, paths: new Set(), wb: d.wb };
+      map[text].count++;
+      if (d.date < map[text].first) map[text].first = d.date;
+      if (d.date > map[text].last)  map[text].last  = d.date;
+      map[text].paths.add(urlPath(d.url));
+    });
   });
   items = Object.values(map).map(x => ({ ...x, paths: [...x.paths] }));
   document.getElementById('total-count').textContent = items.length + ' 用例';
