@@ -152,6 +152,12 @@ mark { background: var(--hl-bg); color: var(--hl-text); font-weight: 700; border
 .wb-link { font-size: .68rem; color: var(--accent); text-decoration: none; }
 .wb-link:hover { text-decoration: underline; }
 
+.row-head-text { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.row-path { font-family: var(--mono); font-size: .78rem; color: var(--accent); }
+.row-preview { font-size: .85rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ex-body { padding: 8px 0 4px; }
+.ex-para { font-size: .92rem; line-height: 1.9; word-break: break-all; padding: 6px 0; }
+.ellipsis { text-align: center; font-size: .8rem; color: var(--muted); padding: 4px 0; letter-spacing: .1em; }
 .empty { text-align: center; padding: 60px 20px; color: var(--muted); font-size: .9rem; }
 .loading { text-align: center; padding: 60px 20px; color: var(--muted); }
 </style>
@@ -195,31 +201,39 @@ function urlPath(url) {
   } catch(e) { return url; }
 }
 
+function renderGroups(groups) {
+  return groups.map(g => `<p class="ex-para">${hl(g.join(''))}</p>`).join('<div class="ellipsis">…</div>');
+}
+
 function render(filtered) {
   const list = document.getElementById('list');
-  document.getElementById('result-count').textContent = filtered.length + ' 用例';
+  document.getElementById('result-count').textContent = filtered.length + ' ページ';
   if (!filtered.length) {
-    list.innerHTML = '<div class="empty">該当する用例がありません</div>';
+    list.innerHTML = '<div class="empty">該当するページがありません</div>';
     return;
   }
   list.innerHTML = filtered.map((item, i) => {
-    const many = item.count >= 5;
-    const pathsHtml = item.paths.map(p => `<span class="path-tag">${p}</span>`).join('');
+    const many = item.count >= 3;
+    // 先頭グループの冒頭テキストをプレビューとして表示
+    const preview = item.groups[0] ? item.groups[0].join('').slice(0, 60) + (item.groups[0].join('').length > 60 ? '…' : '') : '';
     return `<div class="row" id="row${i}">
       <div class="row-head" tabindex="0" role="button" aria-expanded="false"
            onclick="toggle(${i})" onkeydown="if(event.key==='Enter'||event.key===' ')toggle(${i})">
         <span class="cnt${many?' many':''}">${item.count}</span>
-        <span class="sent">${hl(item.text)}</span>
+        <div class="row-head-text">
+          <span class="row-path">${item.path}</span>
+          <span class="row-preview">${hl(preview)}</span>
+        </div>
         <span class="toggle-icon">▶</span>
       </div>
       <div class="row-detail">
         <div class="meta-line">
           <span>初出 <b>${item.first}</b></span>
           <span>最終 <b>${item.last}</b></span>
-          <span>出現 <b>${item.count}</b> 件</span>
+          <span>スナップ <b>${item.count}</b> 件</span>
           <a class="wb-link" href="${item.wb}" target="_blank" rel="noopener">アーカイブで見る →</a>
         </div>
-        <div class="paths">${pathsHtml}</div>
+        <div class="ex-body">${renderGroups(item.groups)}</div>
       </div>
     </div>`;
   }).join('');
@@ -246,22 +260,30 @@ function applyFilter() {
 }
 
 fetch('shibu_results.json').then(r => r.json()).then(data => {
+  // URL単位でまとめる。同じURLの複数スナップは重複除去して統合。
+  // groups: [[セクション内の文, ...], ...] — セクション間は「…」で区切って表示
   const map = {};
   data.forEach(d => {
-    // groups: [[同一要素の文...], ...] — 要素単位で連続している文は一つの用例
-    const groups = d.groups || (d.sentences || d.contexts || []).map(s => [s]);
-    groups.forEach(grp => {
-      const text = grp.map(s => s.trim()).filter(Boolean).join('　');
-      if (!text) return;
-      if (!map[text]) map[text] = { text, count: 0, first: d.date, last: d.date, paths: new Set(), wb: d.wb };
-      map[text].count++;
-      if (d.date < map[text].first) map[text].first = d.date;
-      if (d.date > map[text].last)  map[text].last  = d.date;
-      map[text].paths.add(urlPath(d.url));
+    const key = d.url;
+    const rawGroups = d.groups || (d.sentences || d.contexts || []).map(s => [s]);
+    if (!rawGroups.length) return;
+    if (!map[key]) map[key] = { url: key, path: urlPath(key), groups: [], seenFrags: new Set(), count: 0, first: d.date, last: d.date, wb: d.wb };
+    map[key].count++;
+    if (d.date < map[key].first) map[key].first = d.date;
+    if (d.date > map[key].last)  map[key].last  = d.date;
+    // 各グループを重複除去しながら統合
+    rawGroups.forEach(grp => {
+      const newFrags = grp.map(s => s.trim()).filter(s => s && !map[key].seenFrags.has(s));
+      newFrags.forEach(s => map[key].seenFrags.add(s));
+      if (newFrags.length) map[key].groups.push(newFrags);
     });
   });
-  items = Object.values(map).map(x => ({ ...x, paths: [...x.paths] }));
-  document.getElementById('total-count').textContent = items.length + ' 用例';
+  items = Object.values(map).map(x => {
+    // 検索用テキスト
+    const text = x.groups.map(g => g.join('')).join('');
+    return { ...x, text };
+  });
+  document.getElementById('total-count').textContent = items.length + ' ページ';
   applyFilter();
 });
 
