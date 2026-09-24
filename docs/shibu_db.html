@@ -202,7 +202,7 @@ function urlPath(url) {
 }
 
 function renderGroups(groups) {
-  return groups.map(g => `<p class="ex-para">${hl(g.join(''))}</p>`).join('<div class="ellipsis">…</div>');
+  return groups.map(g => `<p class="ex-para">${g.map(s => hl(s)).join('<br>')}</p>`).join('<div class="ellipsis">…</div>');
 }
 
 function render(filtered) {
@@ -280,7 +280,7 @@ fetch('shibu_results.json').then(r => r.json()).then(data => {
   });
   items = Object.values(map).map(x => {
     // 検索用テキスト
-    const text = x.groups.map(g => g.join('')).join('');
+    const text = x.groups.map(g => g.join('')).join(' ');
     return { ...x, text };
   });
   document.getElementById('total-count').textContent = items.length + ' ページ';
