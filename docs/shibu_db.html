@@ -203,7 +203,8 @@ function urlPath(url) {
 }
 
 function renderGroups(groups) {
-  return groups.map(g => `<p class="ex-para">${g.map(s => hl(s)).join('<br>')}</p>`).join('<div class="ellipsis">…</div>');
+  const filtered = groups.filter(g => g.some(s => s.includes('支部')));
+  return filtered.map(g => `<p class="ex-para">${g.map(s => hl(s)).join('<br>')}</p>`).join('<div class="ellipsis">…</div>');
 }
 
 function render(filtered) {
